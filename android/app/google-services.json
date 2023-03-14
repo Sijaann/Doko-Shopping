@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "216593719134",
+    "project_id": "doko-shopping",
+    "storage_bucket": "doko-shopping.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216593719134:android:4a7851755a080ca66839cf",
+        "android_client_info": {
+          "package_name": "com.example.ecommerce"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "216593719134-ldgkqpha77hkj9i0uobnkbo9s4c8msfl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD14ZOzY0lzbe15VuUI4SOWFpniaLC2Zv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "216593719134-ldgkqpha77hkj9i0uobnkbo9s4c8msfl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

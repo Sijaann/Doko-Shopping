@@ -4,14 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 class AppText extends StatelessWidget {
   final String text;
   final Color color;
-  final double size;
+  final double? size;
   final FontWeight? weight;
   final FontStyle? style;
   const AppText({
     super.key,
     required this.text,
     required this.color,
-    required this.size,
+    this.size = 20,
     this.weight = FontWeight.normal,
     this.style = FontStyle.normal,
   });

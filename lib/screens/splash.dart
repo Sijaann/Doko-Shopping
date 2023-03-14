@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ecommerce/main.dart';
 import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
@@ -24,7 +25,7 @@ class _SplashState extends State<Splash> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => Login(),
+          builder: (context) => RedirectPage(),
         ),
       );
     });
