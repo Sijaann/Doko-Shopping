@@ -1,7 +1,5 @@
-import 'package:ecommerce/screens/admin/admin_nav.dart';
 import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/screens/user/nav_page.dart';
-import 'package:ecommerce/screens/signup.dart';
 import 'package:ecommerce/screens/splash.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,7 +29,7 @@ class _ECommerceState extends State<ECommerce> {
           primary: AppColors.primaryColor,
         ),
       ),
-      home: Splash(),
+      home: const Splash(),
     );
   }
 }
@@ -50,9 +48,9 @@ class _RedirectPageState extends State<RedirectPage> {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return NavPage();
+          return const NavPage();
         } else {
-          return Login();
+          return const Login();
         }
       },
     );

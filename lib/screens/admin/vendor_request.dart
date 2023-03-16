@@ -45,7 +45,7 @@ class _VendorRequestState extends State<VendorRequest> {
                     elevation: 2,
                     child: ListTile(
                       title: const AppText(
-                        text: "Vender Name",
+                        text: "Vendor Name",
                         color: AppColors.primaryColor,
                       ),
                       subtitle: const AppText(

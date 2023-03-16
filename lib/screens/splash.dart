@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:ecommerce/main.dart';
+import 'package:ecommerce/screens/admin/admin_nav.dart';
 import 'package:ecommerce/screens/login.dart';
+import 'package:ecommerce/screens/onboardingScreens/onBoardingScreen.dart';
+import 'package:ecommerce/screens/vendor/vendorNav.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +28,7 @@ class _SplashState extends State<Splash> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => RedirectPage(),
+          builder: (context) => OnBoardingScreen(),
         ),
       );
     });

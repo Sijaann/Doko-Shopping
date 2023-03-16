@@ -1,3 +1,4 @@
+import 'package:ecommerce/utils/app_button.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class _CartState extends State<Cart> {
                 child: Column(
                   children: [
                     SizedBox(
-                      height: MediaQuery.of(context).size.height,
+                      height: MediaQuery.of(context).size.height * 0.62,
                       child: ListView.builder(
                         itemCount: 20,
                         itemBuilder: (context, index) {
@@ -68,11 +69,11 @@ class _CartState extends State<Cart> {
                                     GestureDetector(
                                       onTap: () {
                                         setState(() {
-                                          count++;
+                                          count--;
                                         });
                                       },
                                       child: const Icon(
-                                        Icons.add_circle_outline_rounded,
+                                        Icons.remove_circle_outline_outlined,
                                         size: 18,
                                       ),
                                     ),
@@ -84,11 +85,11 @@ class _CartState extends State<Cart> {
                                     GestureDetector(
                                       onTap: () {
                                         setState(() {
-                                          count--;
+                                          count++;
                                         });
                                       },
                                       child: const Icon(
-                                        Icons.remove_circle_outline_outlined,
+                                        Icons.add_circle_outline_rounded,
                                         size: 18,
                                       ),
                                     ),
@@ -100,6 +101,55 @@ class _CartState extends State<Cart> {
                         },
                       ),
                     ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 5),
+                      child: Divider(
+                        thickness: 2,
+                        color: AppColors.hintTextColor,
+                      ),
+                    ),
+                    Container(
+                      width: 250,
+                      height: 55,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: const [
+                          AppText(
+                            text: "Total",
+                            color: AppColors.secondaryColor,
+                            size: 16,
+                          ),
+                          VerticalDivider(
+                            // height: ,
+                            thickness: 2,
+                            color: AppColors.secondaryColor,
+                          ),
+                          AppText(
+                            text: "Rs.50000",
+                            color: AppColors.secondaryColor,
+                            size: 16,
+                          )
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: AppButton(
+                        onTap: () {},
+                        color: AppColors.primaryColor,
+                        height: 50,
+                        radius: 15,
+                        child: const AppText(
+                          text: "Proceed to check out",
+                          color: AppColors.secondaryColor,
+                          size: 15,
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ),

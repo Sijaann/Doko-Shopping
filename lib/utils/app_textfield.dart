@@ -11,6 +11,7 @@ class AppTextField extends StatelessWidget {
   final IconButton? iconButton;
   final double radius;
   final TextEditingController? controller;
+  final TextInputType? type;
   const AppTextField({
     Key? key,
     this.hintText,
@@ -19,6 +20,7 @@ class AppTextField extends StatelessWidget {
     this.iconButton,
     required this.radius,
     this.controller,
+    this.type = TextInputType.text,
   }) : super(key: key);
 
   @override
@@ -30,6 +32,7 @@ class AppTextField extends StatelessWidget {
         }
       },
       controller: controller,
+      keyboardType: type,
       obscureText: hide,
       decoration: InputDecoration(
         hintText: hintText,

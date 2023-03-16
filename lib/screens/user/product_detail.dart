@@ -1,3 +1,4 @@
+import 'package:ecommerce/utils/app_button.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -157,38 +158,28 @@ class _ProductDetailState extends State<ProductDetail> {
           ),
           Align(
             alignment: AlignmentDirectional.bottomCenter,
-            child: Container(
-              width: double.maxFinite,
-              height: 55,
+            child: AppButton(
+              onTap: () {},
               color: AppColors.primaryColor,
-              child: Center(
-                child: Container(
-                  height: 35,
-                  width: 145,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
+              height: 50,
+              radius: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  AppText(
+                    text: "Add To Cart",
+                    color: AppColors.secondaryColor,
+                    size: 18,
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 20,
                     color: AppColors.secondaryColor,
                   ),
-                  child: MaterialButton(
-                    onPressed: () {},
-                    minWidth: 150,
-                    height: 32,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
-                        AppText(
-                          text: "Add To Cart",
-                          color: AppColors.primaryColor,
-                          size: 15,
-                        ),
-                        Icon(
-                          Icons.shopping_cart_outlined,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                ],
               ),
             ),
           )

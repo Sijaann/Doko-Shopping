@@ -16,22 +16,85 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  // FORM KEY FOR VALIDATION
   final _formKey = GlobalKey<FormState>();
+
+  // TEXTEDITING CONTROLLERS
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final Stream<QuerySnapshot> userStream =
-      FirebaseFirestore.instance.collection('users').snapshots();
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
+  // final Stream<QuerySnapshot> userStream =
+  //     FirebaseFirestore.instance.collection('users').snapshots();
+  // CollectionReference users = FirebaseFirestore.instance.collection('users');
 
+  // USER TYPE DROPDOWN LIST
   List<String> userType = [
     "User",
     "Vendor",
   ];
 
+  // USER TYPE DEFAULT VALUE
   String userTypeValue = "User";
+
+  // Future register(String email, String password) async {
+  //   await FirebaseAuth.instance
+  //       .createUserWithEmailAndPassword(email: email, password: password)
+  //       .then((value) {});
+  // }
+
+  // Future<void> addUser() {
+  //   return users
+  //       .add({
+  //         'name': _nameController.text,
+  //         'contact': _contactController.text,
+  //         'email': _emailController.text,
+  //         'userType': userTypeValue,
+  //       })
+  //       .then((value) => print("Success"))
+  //       .catchError(() => print("error"));
+  // }
+
+  // FIREBASE AND FIRESTORE INITIALIZATIONS
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // REGISTERING USER TO THE DATABASE AND STORING USER DATA TO FIRESTORE
+  void _register() async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      String uid = userCredential.user!.uid;
+      String name = _nameController.text.trim();
+      String contact = _contactController.text.trim();
+      String email = _emailController.text.trim();
+      String userTypeVal = userTypeValue.toString();
+
+      await _firestore.collection('users').doc(uid).set({
+        'userId': uid,
+        'name': name,
+        'contact': contact,
+        'email': email,
+        'userType': userTypeVal,
+      }).then((value) {
+        setState(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NavPage(),
+            ),
+          );
+        });
+      });
+    } on FirebaseAuthException catch (e) {
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,15 +238,16 @@ class _SignUpState extends State<SignUp> {
                             child: MaterialButton(
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
-                                  register(_emailController.text,
-                                      _passwordController.text);
-                                  addUser();
-                                  setState(() {
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => NavPage()));
-                                  });
+                                  _register();
+                                  // register(_emailController.text,
+                                  //     _passwordController.text);
+                                  // // addUser();
+                                  // setState(() {
+                                  //   Navigator.pushReplacement(
+                                  //       context,
+                                  //       MaterialPageRoute(
+                                  //           builder: (context) => NavPage()));
+                                  // });
                                 }
                               },
                               shape: RoundedRectangleBorder(
@@ -236,20 +300,14 @@ class _SignUpState extends State<SignUp> {
     );
   }
 
-  Future register(String email, String password) async {
-    await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
-  }
-
-  Future<void> addUser() {
-    return users
-        .add({
-          'name': _nameController.text,
-          'contact': _contactController.text,
-          'email': _emailController.text,
-          'userType': userTypeValue,
-        })
-        .then((value) => print("Success"))
-        .catchError(() => print("error"));
-  }
+  // storeNewUser(user, context) async {
+  //   var firebaseUser = await FirebaseAuth.instance.currentUser;
+  //   FirebaseFirestore.instance.collection('users').doc(firebaseUser!.uid).set({
+  //     'uid': user.uid,
+  //     'name': user._nameController.text,
+  //     'contact': user._contactController,
+  //     'email': user._emailController.text,
+  //     'userType': user.userTypeValue,
+  //   });
+  // }
 }

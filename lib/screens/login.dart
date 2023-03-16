@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce/screens/admin/admin_nav.dart';
 import 'package:ecommerce/screens/signup.dart';
 import 'package:ecommerce/screens/user/nav_page.dart';
+import 'package:ecommerce/screens/vendor/vendorNav.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/app_textfield.dart';
 import 'package:ecommerce/utils/colors.dart';
@@ -21,25 +23,65 @@ class _LoginState extends State<Login> {
   final TextEditingController _passwordController = TextEditingController();
   var hidePassword = true;
 
-  // User? _user;
-  // Map<String, dynamic>? _userData;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _user = FirebaseAuth.instance.currentUser;
-  //   _loadUserData();
-  // }
+  User? _user;
 
-  // void _loadUserData() async {
-  //   final userData = await FirebaseFirestore.instance
-  //       .collection('users')
-  //       .doc(_user!.uid)
-  //       .get();
-  //   setState(() {
-  //     _userData = userData.data();
-  //   });
-  // }
+  void _login() async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      _getCurrentUser();
+    } on FirebaseAuthException catch (e) {
+      print('Login failed: ${e.message}');
+    }
+  }
+
+  void _getCurrentUser() async {
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    if (firebaseUser != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get()
+          .then((value) {
+        if (value.data()!['userType'] == "admin") {
+          setState(() {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AdminNav(),
+              ),
+            );
+          });
+        }
+        if (value.data()!['userType'] == "User") {
+          setState(() {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NavPage(),
+              ),
+            );
+          });
+        }
+        if (value.data()!['userType'] == "Vendor") {
+          setState(() {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VendorNav(),
+              ),
+            );
+          });
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,36 +191,41 @@ class _LoginState extends State<Login> {
                             width: MediaQuery.of(context).size.width,
                             child: MaterialButton(
                               onPressed: () async {
+                                // if (_formkey.currentState!.validate()) {
+                                //   login(_emailController.text,
+                                //       _passwordController.text);
+                                // }
                                 if (_formkey.currentState!.validate()) {
-                                  try {
-                                    final userCredential = await FirebaseAuth
-                                        .instance
-                                        .signInWithEmailAndPassword(
-                                      email: _emailController.text,
-                                      password: _passwordController.text,
-                                    );
-                                    print(userCredential);
-                                    final user = userCredential.user!;
-                                    final userData = await FirebaseFirestore
-                                        .instance
-                                        .collection('users')
-                                        .doc(user.uid)
-                                        .get();
-                                    print('User data: ${userData.data()}');
-                                  } on FirebaseAuthException catch (e) {
-                                    print('Login failed: ${e.message}');
-                                  }
+                                  _login();
+                                  // try {
+                                  //   final userCredential = await FirebaseAuth
+                                  //       .instance
+                                  //       .signInWithEmailAndPassword(
+                                  //     email: _emailController.text,
+                                  //     password: _passwordController.text,
+                                  //   );
+                                  //   // print(userCredential);
+                                  //   final user = userCredential.user!;
+                                  //   final userData = await FirebaseFirestore
+                                  //       .instance
+                                  //       .collection('users')
+                                  //       .doc(user.uid)
+                                  //       .get();
+                                  //   print('User data: ${userData.data()}');
+                                  // } on FirebaseAuthException catch (e) {
+                                  //   print('Login failed: ${e.message}');
+                                  // }
                                   // getUserId();
                                   // print("$_userData!['name']");
 
-                                  setState(
-                                    () {
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => NavPage()));
-                                    },
-                                  );
+                                  // setState(
+                                  //   () {
+                                  //     Navigator.pushReplacement(
+                                  //         context,
+                                  //         MaterialPageRoute(
+                                  //             builder: (context) => NavPage()));
+                                  //   },
+                                  // );
                                   // getUserName();
 
                                   // getUserId();
@@ -241,26 +288,26 @@ class _LoginState extends State<Login> {
     );
   }
 
-  // Future login(String email, String password) async {
-  //   await FirebaseAuth.instance
-  //       .signInWithEmailAndPassword(email: email, password: password);
-  //   //     .then((value) {
-  //   //   setState(() {
-  //   //     Navigator.pushReplacement(
-  //   //         context, MaterialPageRoute(builder: (context) => NavPage()));
-  //   //   });
-  //   // });
-  // }
-
-  var userID;
-  getUserId() {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user != null) {
-        userID = user.uid;
-        print(user.uid);
-      }
-    });
+  Future login(String email, String password) async {
+    await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password);
+    //   //     .then((value) {
+    //   //   setState(() {
+    //   //     Navigator.pushReplacement(
+    //   //         context, MaterialPageRoute(builder: (context) => NavPage()));
+    //   //   });
+    //   // });
   }
+
+  // var userID;
+  // getUserId() {
+  //   FirebaseAuth.instance.authStateChanges().listen((User? user) {
+  //     if (user != null) {
+  //       userID = user.uid;
+  //       print(user.uid);
+  //     }
+  //   });
+  // }
 
   // Future<DocumentSnapshot> getUserData(String userId) async {
   //   final usersRef = FirebaseFirestore.instance.collection('users');
