@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
@@ -12,6 +13,13 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
+  // Stream to get data from a collection
+  final Stream<QuerySnapshot> userStream = FirebaseFirestore.instance
+      .collection('users')
+      .where('status', isEqualTo: 'verified')
+      .where('userType', isEqualTo: 'Vendor')
+      .snapshots();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,51 +43,65 @@ class _AdminHomeState extends State<AdminHome> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(top: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 10),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: userStream,
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Center(
               child: AppText(
-                text: "All Verified Vendors",
+                text: "Something went wrong",
                 color: AppColors.primaryColor,
                 weight: FontWeight.w500,
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 15,
-                itemBuilder: (context, index) {
-                  return Card(
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          final List<ListTile> listTiles = snapshot.data!.docs
+              .map(
+                (DocumentSnapshot document) => ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  title: AppText(
+                    text: document['name'],
+                    color: AppColors.primaryColor,
+                    weight: FontWeight.w500,
+                    size: 16,
+                  ),
+                  subtitle: AppText(
+                    text: document['email'] + ' | ' + document['contact'],
+                    color: AppColors.hintTextColor,
+                    size: 15,
+                  ),
+                ),
+              )
+              .toList();
+
+          return Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10).copyWith(top: 10),
+            child: ListView.builder(
+              itemCount: listTiles.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Card(
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15)),
-                    child: ListTile(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      title: AppText(
-                        text: "Demo Vendor",
-                        color: AppColors.primaryColor,
-                      ),
-                      subtitle: AppText(
-                        text: "Contact Info",
-                        color: AppColors.hintTextColor,
-                        size: 15,
-                      ),
-                      trailing: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.delete),
-                        color: Colors.red,
-                      ),
-                      onTap: () {},
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  );
-                },
-              ),
-            )
-          ],
-        ),
+                    elevation: 2,
+                    child: listTiles[index],
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -88,8 +110,8 @@ class _AdminHomeState extends State<AdminHome> {
     FirebaseAuth.instance.signOut().then(
           (value) => setState(
             () {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => Login()));
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => const Login()));
             },
           ),
         );

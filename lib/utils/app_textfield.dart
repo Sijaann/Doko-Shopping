@@ -12,6 +12,7 @@ class AppTextField extends StatelessWidget {
   final double radius;
   final TextEditingController? controller;
   final TextInputType? type;
+  final int? maxLines;
   const AppTextField({
     Key? key,
     this.hintText,
@@ -21,6 +22,7 @@ class AppTextField extends StatelessWidget {
     required this.radius,
     this.controller,
     this.type = TextInputType.text,
+    this.maxLines = 1,
   }) : super(key: key);
 
   @override
@@ -32,6 +34,7 @@ class AppTextField extends StatelessWidget {
         }
       },
       controller: controller,
+      maxLines: maxLines,
       keyboardType: type,
       obscureText: hide,
       decoration: InputDecoration(

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:ecommerce/utils/app_button.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/app_textfield.dart';
@@ -16,6 +17,8 @@ class AddProduct extends StatefulWidget {
 }
 
 class _AddProductState extends State<AddProduct> {
+  final _formKey = GlobalKey<FormState>();
+
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -59,85 +62,100 @@ class _AddProductState extends State<AddProduct> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
           child: Column(
             children: [
-              GestureDetector(
-                onTap: selectImage,
-                child: Container(
-                  height: 250,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 2,
-                      color: AppColors.primaryColor,
-                    ),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.image,
-                          color: AppColors.hintTextColor,
-                          size: 35,
+              (images.isNotEmpty)
+                  ? CarouselSlider(
+                      items: images
+                          .map(
+                            (e) => Builder(
+                              builder: (BuildContext context) {
+                                return Image.file(
+                                  e,
+                                  fit: BoxFit.cover,
+                                  height: 250,
+                                );
+                              },
+                            ),
+                          )
+                          .toList(),
+                      options: CarouselOptions(
+                        viewportFraction: 1,
+                        height: 200,
+                      ),
+                    )
+                  : GestureDetector(
+                      onTap: selectImage,
+                      child: Container(
+                        height: 250,
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 2,
+                            color: AppColors.primaryColor,
+                          ),
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        AppText(
-                          text: "Select Images",
-                          color: AppColors.hintTextColor,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: AppTextField(
-                  controller: _productNameController,
-                  hide: false,
-                  radius: 15,
-                  hintText: "Product Name",
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: TextFormField(
-                  controller: _descriptionController,
-                  maxLines: 7,
-                  decoration: InputDecoration(
-                    hintText: "Description",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    hintStyle: GoogleFonts.montserrat(
-                      color: AppColors.hintTextColor,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: const BorderSide(
-                        width: 2,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.image,
+                                color: AppColors.hintTextColor,
+                                size: 35,
+                              ),
+                              AppText(
+                                text: "Select Images",
+                                color: AppColors.hintTextColor,
+                              )
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: AppTextField(
-                  controller: _priceController,
-                  hide: false,
-                  radius: 15,
-                  hintText: "Price",
-                  type: TextInputType.number,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: AppTextField(
-                  controller: _quantityController,
-                  hide: false,
-                  radius: 15,
-                  hintText: "Quantity",
-                  type: TextInputType.number,
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: AppTextField(
+                        controller: _productNameController,
+                        hide: false,
+                        radius: 15,
+                        hintText: "Product Name",
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: AppTextField(
+                        controller: _descriptionController,
+                        hide: false,
+                        radius: 15,
+                        hintText: "Description",
+                        maxLines: 7,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: AppTextField(
+                        controller: _priceController,
+                        hide: false,
+                        radius: 15,
+                        hintText: "Price",
+                        type: TextInputType.number,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: AppTextField(
+                        controller: _quantityController,
+                        hide: false,
+                        radius: 15,
+                        hintText: "Quantity",
+                        type: TextInputType.number,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Padding(
@@ -169,7 +187,9 @@ class _AddProductState extends State<AddProduct> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: AppButton(
-                    onTap: () {},
+                    onTap: () {
+                      if (_formKey.currentState!.validate()) {}
+                    },
                     color: AppColors.primaryColor,
                     height: 50,
                     radius: 15,

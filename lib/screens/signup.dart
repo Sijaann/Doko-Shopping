@@ -4,6 +4,7 @@ import 'package:ecommerce/screens/user/nav_page.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/app_textfield.dart';
 import 'package:ecommerce/utils/colors.dart';
+import 'package:ecommerce/utils/show_shanckbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,23 +39,7 @@ class _SignUpState extends State<SignUp> {
   // USER TYPE DEFAULT VALUE
   String userTypeValue = "User";
 
-  // Future register(String email, String password) async {
-  //   await FirebaseAuth.instance
-  //       .createUserWithEmailAndPassword(email: email, password: password)
-  //       .then((value) {});
-  // }
-
-  // Future<void> addUser() {
-  //   return users
-  //       .add({
-  //         'name': _nameController.text,
-  //         'contact': _contactController.text,
-  //         'email': _emailController.text,
-  //         'userType': userTypeValue,
-  //       })
-  //       .then((value) => print("Success"))
-  //       .catchError(() => print("error"));
-  // }
+  String status = "verified";
 
   // FIREBASE AND FIRESTORE INITIALIZATIONS
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -81,18 +66,27 @@ class _SignUpState extends State<SignUp> {
         'contact': contact,
         'email': email,
         'userType': userTypeVal,
+        'status': status,
       }).then((value) {
-        setState(() {
+        if (status == "verified") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => NavPage(),
             ),
           );
-        });
+        }
+        if (status == "unverified") {
+          showSnackBar(context,
+              "Vendor account yet to be verified by admin. Please wait!");
+          _nameController.clear();
+          _contactController.clear();
+          _emailController.clear();
+          _passwordController.clear();
+        }
       });
     } on FirebaseAuthException catch (e) {
-      print(e.toString());
+      showSnackBar(context, e.toString());
     }
   }
 
@@ -228,6 +222,9 @@ class _SignUpState extends State<SignUp> {
                               setState(() {
                                 userTypeValue = value!;
                               });
+                              if (userTypeValue == "Vendor") {
+                                status = "unverified";
+                              }
                             },
                           ),
                         ),
