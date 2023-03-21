@@ -10,6 +10,7 @@ Future<List<File>?> pickImage() async {
     var files = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: true,
+      allowCompression: true,
     );
 
     if (files != null && files.files.isNotEmpty) {

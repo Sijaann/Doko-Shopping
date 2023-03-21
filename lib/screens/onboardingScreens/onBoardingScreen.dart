@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/main.dart';
+import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/screens/onboardingScreens/introScreen2.dart';
 import 'package:ecommerce/screens/onboardingScreens/introScreen3.dart';
 import 'package:ecommerce/screens/onboardingScreens/introScren1.dart';
@@ -67,7 +68,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => RedirectPage(),
+                            builder: (context) => Login(),
                           ),
                         );
                       },

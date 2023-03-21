@@ -14,6 +14,7 @@ class VendorRequest extends StatefulWidget {
 class _VendorRequestState extends State<VendorRequest> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
 
+  // Update the vendor status with to the UserID of the vendor
   Future<void> updateRequest({required dynamic id}) {
     return users.doc(id).update({'status': "verified"}).then((value) {
       showSnackBar(context, "Vendor Account Verified");
@@ -22,6 +23,7 @@ class _VendorRequestState extends State<VendorRequest> {
     });
   }
 
+  // This Delete only delets the Record of the vendor not the account itself.
   Future<void> deleteRequest({required dynamic id}) {
     return users.doc(id).delete().then((value) {
       showSnackBar(context, "Request Removed!");

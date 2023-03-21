@@ -1,13 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:ecommerce/utils/app_button.dart';
-import 'package:ecommerce/utils/app_text.dart';
-import 'package:ecommerce/utils/app_textfield.dart';
-import 'package:ecommerce/utils/colors.dart';
-import 'package:ecommerce/utils/pickImages.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '/utils/app_button.dart';
+import '/utils/app_text.dart';
+import '/utils/app_textfield.dart';
+import '/utils/colors.dart';
+import '/utils/pickImages.dart';
+import '/utils/show_shanckbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AddProduct extends StatefulWidget {
   const AddProduct({super.key});
@@ -18,6 +22,8 @@ class AddProduct extends StatefulWidget {
 
 class _AddProductState extends State<AddProduct> {
   final _formKey = GlobalKey<FormState>();
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final TextEditingController _productNameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -30,6 +36,7 @@ class _AddProductState extends State<AddProduct> {
     "Appliances",
     "Clothing",
     "Cosmetics",
+    "Electronics",
   ];
 
   String categoryValue = "Mobile";
@@ -41,6 +48,81 @@ class _AddProductState extends State<AddProduct> {
     setState(() {
       images = res!;
     });
+
+    // print(images);
+    openImage();
+  }
+
+  // String imagePath = "";
+  List<String> imagePaths = [];
+  List<File> imageFiles = [];
+  List<Uint8List> imageBytes = [];
+  List<String> base64Strings = [];
+
+  openImage() async {
+    try {
+      for (int i = 0; i < images.length; i++) {
+        imagePaths.add(images[i].toString().substring(6));
+        // print(i);
+      }
+      // print(imagePaths);
+
+      for (String path in imagePaths) {
+        int pathLength = path.length;
+        imageFiles.add(File(path.substring(2, pathLength - 1)));
+        // print(imageFiles);
+      }
+
+      for (File file in imageFiles) {
+        // Uint8List imgByte = await file.readAsBytes();
+        imageBytes.add(await file.readAsBytes());
+      }
+      // print(imageBytes);
+
+      for (Uint8List imgByte in imageBytes) {
+        base64Strings.add(base64Encode(imgByte));
+      }
+      debugPrint(base64Strings[0]);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  void _addProducts() async {
+    try {
+      final User user = FirebaseAuth.instance.currentUser!;
+      String vendorId = user.uid;
+      String productName = _productNameController.text;
+      String description = _descriptionController.text;
+      double price = double.parse(_priceController.text);
+      int quantity = int.parse(_quantityController.text);
+      String category = categoryValue;
+      List images = base64Strings;
+
+      await _firestore.collection('products').doc().set({
+        'vendorId': vendorId,
+        'productName': productName,
+        'description': description,
+        'price': price,
+        'quantity': quantity,
+        'category': category,
+        'images': images,
+      }).then((value) {
+        showSnackBar(context, "Product added successfully");
+
+        Navigator.pop(context);
+      }).onError((error, stackTrace) {
+        showSnackBar(context, error.toString());
+      });
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _addProducts();
   }
 
   @override
@@ -188,7 +270,14 @@ class _AddProductState extends State<AddProduct> {
                   width: MediaQuery.of(context).size.width,
                   child: AppButton(
                     onTap: () {
-                      if (_formKey.currentState!.validate()) {}
+                      if (_formKey.currentState!.validate()) {
+                        if (images.isNotEmpty) {
+                          _addProducts();
+                        } else {
+                          showSnackBar(
+                              context, "Please Select atleast one image");
+                        }
+                      }
                     },
                     color: AppColors.primaryColor,
                     height: 50,
