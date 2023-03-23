@@ -38,7 +38,8 @@ class AppTextField extends StatelessWidget {
       keyboardType: type,
       obscureText: hide,
       decoration: InputDecoration(
-        hintText: hintText,
+        labelText: hintText,
+        // hintText: hintText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
         ),

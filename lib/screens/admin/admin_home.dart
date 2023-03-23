@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ecommerce/screens/login.dart';
+import 'package:ecommerce/logic/logout.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AdminHome extends StatefulWidget {
@@ -19,6 +18,7 @@ class _AdminHomeState extends State<AdminHome> {
       .where('status', isEqualTo: 'verified')
       .where('userType', isEqualTo: 'Vendor')
       .snapshots();
+  final SignOut signout = SignOut();
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,9 @@ class _AdminHomeState extends State<AdminHome> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: IconButton(
-              onPressed: logout,
+              onPressed: () {
+                signout.logout(context: context);
+              },
               icon: const Icon(Icons.logout_rounded),
             ),
           ),
@@ -106,14 +108,14 @@ class _AdminHomeState extends State<AdminHome> {
     );
   }
 
-  logout() {
-    FirebaseAuth.instance.signOut().then(
-          (value) => setState(
-            () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => const Login()));
-            },
-          ),
-        );
-  }
+  // logout() {
+  //   FirebaseAuth.instance.signOut().then(
+  //         (value) => setState(
+  //           () {
+  //             Navigator.pushReplacement(context,
+  //                 MaterialPageRoute(builder: (context) => const Login()));
+  //           },
+  //         ),
+  //       );
+  // }
 }

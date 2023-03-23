@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce/logic/auth.dart';
 import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/screens/user/nav_page.dart';
 import 'package:ecommerce/utils/app_text.dart';
@@ -45,50 +46,7 @@ class _SignUpState extends State<SignUp> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // REGISTERING USER TO THE DATABASE AND STORING USER DATA TO FIRESTORE
-  void _register() async {
-    try {
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      String uid = userCredential.user!.uid;
-      String name = _nameController.text.trim();
-      String contact = _contactController.text.trim();
-      String email = _emailController.text.trim();
-      String userTypeVal = userTypeValue.toString();
-
-      await _firestore.collection('users').doc(uid).set({
-        'userId': uid,
-        'name': name,
-        'contact': contact,
-        'email': email,
-        'userType': userTypeVal,
-        'status': status,
-      }).then((value) {
-        if (status == "verified") {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NavPage(),
-            ),
-          );
-        }
-        if (status == "unverified") {
-          showSnackBar(context,
-              "Vendor account yet to be verified by admin. Please wait!");
-          _nameController.clear();
-          _contactController.clear();
-          _emailController.clear();
-          _passwordController.clear();
-        }
-      });
-    } on FirebaseAuthException catch (e) {
-      showSnackBar(context, e.toString());
-    }
-  }
+  final Auth auth = Auth();
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +191,25 @@ class _SignUpState extends State<SignUp> {
                           child: MaterialButton(
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
-                                _register();
+                                // _register();
+
+                                auth.register(
+                                  auth: _auth,
+                                  firestore: _firestore,
+                                  context: context,
+                                  email: _emailController.text,
+                                  password: _passwordController.text,
+                                  name: _nameController.text,
+                                  contact: _contactController.text,
+                                  userType: userTypeValue,
+                                  status: status,
+                                  emailController: _emailController,
+                                  passwordController: _passwordController,
+                                  contactController: _contactController,
+                                  nameController: _nameController,
+                                  cart: [],
+                                );
+
                                 // register(_emailController.text,
                                 //     _passwordController.text);
                                 // // addUser();

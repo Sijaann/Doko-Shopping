@@ -4,23 +4,46 @@ import 'dart:typed_data';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '/utils/app_button.dart';
-import '/utils/app_text.dart';
-import '/utils/app_textfield.dart';
-import '/utils/colors.dart';
-import '/utils/pickImages.dart';
-import '/utils/show_shanckbar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:ecommerce/logic/updateData.dart';
 import 'package:flutter/material.dart';
 
-class AddProduct extends StatefulWidget {
-  const AddProduct({super.key});
+import '../../utils/app_button.dart';
+import '../../utils/app_text.dart';
+import '../../utils/app_textfield.dart';
+import '../../utils/colors.dart';
+import '../../utils/pickImages.dart';
+import '../../utils/show_shanckbar.dart';
+
+class UpdateProduct extends StatefulWidget {
+  final String id;
+  final String name;
+  final String description;
+  final double price;
+  final int quantity;
+  final String category;
+  final List images;
+
+  const UpdateProduct({
+    super.key,
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.quantity,
+    required this.category,
+    required this.images,
+  });
 
   @override
-  State<AddProduct> createState() => _AddProductState();
+  State<UpdateProduct> createState() => _UpdateProductState();
 }
 
-class _AddProductState extends State<AddProduct> {
+class _UpdateProductState extends State<UpdateProduct> {
+  CollectionReference products =
+      FirebaseFirestore.instance.collection('products');
+
+  UpdateData updateData = UpdateData();
+
   final _formKey = GlobalKey<FormState>();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -30,6 +53,7 @@ class _AddProductState extends State<AddProduct> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
+  late String categoryValue;
   List<String> categories = [
     "Mobile",
     "Laptop",
@@ -39,7 +63,11 @@ class _AddProductState extends State<AddProduct> {
     "Electronics",
   ];
 
-  String categoryValue = "Mobile";
+  // String imagePath = "";
+  List<String> imagePaths = [];
+  List<File> imageFiles = [];
+  List<Uint8List> imageBytes = [];
+  List<String> base64Strings = [];
 
   List<File> images = [];
 
@@ -53,11 +81,25 @@ class _AddProductState extends State<AddProduct> {
     openImage();
   }
 
-  // String imagePath = "";
-  List<String> imagePaths = [];
-  List<File> imageFiles = [];
-  List<Uint8List> imageBytes = [];
-  List<String> base64Strings = [];
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _productNameController.dispose();
+    _descriptionController.dispose();
+    _priceController.dispose();
+    _quantityController.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _productNameController.text = widget.name;
+    _descriptionController.text = widget.description;
+    _priceController.text = widget.price.toString();
+    _quantityController.text = widget.quantity.toString();
+    categoryValue = widget.category;
+  }
 
   openImage() async {
     try {
@@ -88,77 +130,45 @@ class _AddProductState extends State<AddProduct> {
     }
   }
 
-  // void _addProducts() async {
-  //   try {
-  //     final User user = FirebaseAuth.instance.currentUser!;
-  //     String vendorId = user.uid;
-  //     String productName = _productNameController.text;
-  //     String description = _descriptionController.text;
-  //     double price = double.parse(_priceController.text);
-  //     int quantity = int.parse(_quantityController.text);
-  //     String category = categoryValue;
-  //     List images = base64Strings;
+  // Future<void> updateProduct() {
+  //   String productName = _productNameController.text;
+  //   String description = _descriptionController.text;
+  //   double price = double.parse(_priceController.text);
+  //   int quantity = int.parse(_quantityController.text);
+  //   String category = categoryValue;
+  //   List images = base64Strings;
+  //   List unchangedImages = widget.images;
 
-  //     await _firestore.collection('products').doc().set({
-  //       'vendorId': vendorId,
+  //   if (images.isEmpty) {
+  //     return products.doc(widget.id).update({
   //       'productName': productName,
   //       'description': description,
-  //       'price': price,
-  //       'quantity': quantity,
+  //       'price': price.toDouble(),
+  //       'quantity': quantity.toInt(),
+  //       'category': category,
+  //       'images': unchangedImages,
+  //     }).then((value) {
+  //       Navigator.pop(context);
+  //       showSnackBar(context, "Product Updated!");
+  //     });
+  //   } else {
+  //     return products.doc(widget.id).update({
+  //       'productName': productName,
+  //       'description': description,
+  //       'price': price.toDouble(),
+  //       'quantity': quantity.toInt(),
   //       'category': category,
   //       'images': images,
   //     }).then((value) {
-  //       showSnackBar(context, "Product added successfully");
-
   //       Navigator.pop(context);
-  //     }).onError((error, stackTrace) {
-  //       showSnackBar(context, error.toString());
+  //       showSnackBar(context, "Product Updated!");
   //     });
-  //   } catch (e) {
-  //     showSnackBar(context, e.toString());
   //   }
-  // }
-
-  void _addProducts() async {
-    try {
-      final User user = FirebaseAuth.instance.currentUser!;
-      String vendorId = user.uid;
-      String productName = _productNameController.text;
-      String description = _descriptionController.text;
-      double price = double.parse(_priceController.text);
-      int quantity = int.parse(_quantityController.text);
-      String category = categoryValue;
-      List images = base64Strings;
-
-      DocumentReference newProductRef =
-          await _firestore.collection('products').add({
-        'vendorId': vendorId,
-        'productName': productName,
-        'description': description,
-        'price': price,
-        'quantity': quantity,
-        'category': category,
-        'images': images,
-      });
-
-      String newProductId = newProductRef.id;
-      await newProductRef.update({'productId': newProductId}).then((value) {
-        showSnackBar(context, "Product added successfully");
-        Navigator.pop(context);
-      });
-    } catch (e) {
-      showSnackBar(context, e.toString());
-    }
-  }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _addProducts();
   // }
 
   @override
   Widget build(BuildContext context) {
+    String categotyValue = widget.category;
     return Scaffold(
       appBar: AppBar(
         title: const Padding(
@@ -166,7 +176,7 @@ class _AddProductState extends State<AddProduct> {
             horizontal: 15,
           ),
           child: AppText(
-            text: "Add Products",
+            text: "Update Product",
             color: AppColors.secondaryColor,
           ),
         ),
@@ -285,7 +295,7 @@ class _AddProductState extends State<AddProduct> {
                 child: DropdownButton(
                   borderRadius: BorderRadius.circular(10),
                   isExpanded: true,
-                  value: categoryValue,
+                  value: categotyValue,
                   icon: const Icon(Icons.keyboard_arrow_down),
                   items: categories.map((String item) {
                     return DropdownMenuItem(
@@ -310,19 +320,26 @@ class _AddProductState extends State<AddProduct> {
                   child: AppButton(
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
-                        if (images.isNotEmpty) {
-                          _addProducts();
-                        } else {
-                          showSnackBar(
-                              context, "Please Select atleast one image");
-                        }
+                        updateData.updateProduct(
+                          id: widget.id,
+                          reference: products,
+                          context: context,
+                          productName: _productNameController.text,
+                          description: _descriptionController.text,
+                          price: double.parse(_priceController.text),
+                          quantity: int.parse(_quantityController.text),
+                          category: categoryValue,
+                          unchangedImages: widget.images,
+                          images: base64Strings,
+                        );
+                        // updateProduct();
                       }
                     },
                     color: AppColors.primaryColor,
                     height: 50,
                     radius: 15,
                     child: const AppText(
-                      text: "Add Product",
+                      text: "Update Product",
                       color: AppColors.secondaryColor,
                     ),
                   ),

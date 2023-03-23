@@ -1,15 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ecommerce/screens/admin/admin_nav.dart';
 import 'package:ecommerce/screens/signup.dart';
-import 'package:ecommerce/screens/user/nav_page.dart';
-import 'package:ecommerce/screens/vendor/vendorNav.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/app_textfield.dart';
 import 'package:ecommerce/utils/colors.dart';
-import 'package:ecommerce/utils/show_shanckbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../logic/Auth.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -25,69 +22,7 @@ class _LoginState extends State<Login> {
   var hidePassword = true;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  void _login() async {
-    try {
-      await _auth.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      _getCurrentUser();
-    } on FirebaseAuthException catch (e) {
-      showSnackBar(context, e.toString());
-    }
-  }
-
-  void _getCurrentUser() async {
-    final firebaseUser = FirebaseAuth.instance.currentUser;
-    if (firebaseUser != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(firebaseUser.uid)
-          .get()
-          .then((value) {
-        if (value.data()!['userType'] == "Admin") {
-          setState(() {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AdminNav(),
-              ),
-            );
-          });
-        }
-        if (value.data()!['userType'] == "User") {
-          setState(() {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const NavPage(),
-              ),
-            );
-          });
-        }
-        if (value.data()!['userType'] == "Vendor") {
-          if (value.data()!['userType'] == "Vendor" &&
-              value.data()!['status'] == "verified") {
-            setState(() {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const VendorNav(),
-                ),
-              );
-            });
-          }
-          if (value.data()!['userType'] == "Vendor" &&
-              value.data()!['status'] == "unverified") {
-            showSnackBar(context,
-                "Your Account is yet to be verified by admin. Please try again later!");
-          }
-        }
-      });
-    }
-  }
+  final Auth auth = Auth();
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +133,12 @@ class _LoginState extends State<Login> {
                             child: MaterialButton(
                               onPressed: () {
                                 if (_formkey.currentState!.validate()) {
-                                  _login();
+                                  auth.login(
+                                    auth: _auth,
+                                    email: _emailController.text,
+                                    password: _passwordController.text,
+                                    context: context,
+                                  );
                                 }
                               },
                               shape: RoundedRectangleBorder(
@@ -250,32 +190,4 @@ class _LoginState extends State<Login> {
       ),
     );
   }
-
-  // Future login(String email, String password) async {
-  //   await FirebaseAuth.instance
-  //       .signInWithEmailAndPassword(email: email, password: password);
-  //   //   //     .then((value) {
-  //   //   //   setState(() {
-  //   //   //     Navigator.pushReplacement(
-  //   //   //         context, MaterialPageRoute(builder: (context) => NavPage()));
-  //   //   //   });
-  //   //   // });
-  // }
-
-  // var userID;
-  // getUserId() {
-  //   FirebaseAuth.instance.authStateChanges().listen((User? user) {
-  //     if (user != null) {
-  //       userID = user.uid;
-  //       print(user.uid);
-  //     }
-  //   });
-  // }
-
-  // Future<DocumentSnapshot> getUserData(String userId) async {
-  //   final usersRef = FirebaseFirestore.instance.collection('users');
-
-  //   final userDoc = await usersRef.doc(userId).get();
-  //   return userDoc;
-  // }
 }

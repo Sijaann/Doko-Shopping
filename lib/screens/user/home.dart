@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce/logic/logout.dart';
 import 'package:ecommerce/screens/login.dart';
+import 'package:ecommerce/screens/user/all_products.dart';
 import 'package:ecommerce/screens/user/product_detail.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
+import 'package:ecommerce/utils/product_grid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +27,7 @@ class _HomeState extends State<Home> {
   ];
 
   final User user = FirebaseAuth.instance.currentUser!;
+  final SignOut signOut = SignOut();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +47,7 @@ class _HomeState extends State<Home> {
               padding: const EdgeInsets.symmetric(horizontal: 15),
               child: IconButton(
                 onPressed: () {
-                  logout();
+                  signOut.logout(context: context);
                 },
                 icon: const Icon(Icons.logout_rounded),
               ),
@@ -209,73 +213,33 @@ class _HomeState extends State<Home> {
               );
             }
 
-            final List<Container> productGrid = snapshot.data!.docs
-                .map(
-                  (DocumentSnapshot document) => Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
+            final List<GestureDetector> productGrid =
+                snapshot.data!.docs.map((DocumentSnapshot document) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetail(
+                        images: document['images'],
+                        name: document['productName'],
+                        description: document['description'],
+                        price: document['price'],
+                        pId: document['productId'],
+                        uId: user.uid,
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        Container(
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                          ),
-                          width: double.maxFinite,
-                          height: MediaQuery.of(context).size.height * 0.15,
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                            child: Image.memory(
-                              base64Decode(
-                                document['images'][0],
-                              ),
-                              fit: BoxFit.fitHeight,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: double.maxFinite,
-                          height: MediaQuery.of(context).size.height * 0.072,
-                          decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(15),
-                              bottomRight: Radius.circular(15),
-                            ),
-                            color: AppColors.primaryColor,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4)
-                                .copyWith(left: 7),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AppText(
-                                  text: document['productName'],
-                                  color: AppColors.secondaryColor,
-                                  size: 16,
-                                  weight: FontWeight.w500,
-                                ),
-                                AppText(
-                                  text: "Rs.${document['price']}",
-                                  color: AppColors.secondaryColor,
-                                  size: 13,
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-                .toList();
+                  );
+                  print(user.uid);
+                },
+                child: ProductGrid(
+                  imageString: document['images'][0],
+                  name: document['productName'],
+                  price: document['price'],
+                  height: MediaQuery.of(context).size.height * 0.0721,
+                ),
+              );
+            }).toList();
 
             return (productGrid.isEmpty)
                 ? const Center(
@@ -290,7 +254,7 @@ class _HomeState extends State<Home> {
                     child: Column(
                       children: [
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.3,
+                          height: MediaQuery.of(context).size.height * 0.25,
                           width: MediaQuery.of(context).size.width,
                           color: Colors.amber,
                           child: ListView.builder(
@@ -301,7 +265,7 @@ class _HomeState extends State<Home> {
                                 width: MediaQuery.of(context).size.width,
                                 child: Image.network(
                                   image[index],
-                                  fit: BoxFit.fitWidth,
+                                  fit: BoxFit.cover,
                                 ),
                               );
                             },
@@ -310,10 +274,30 @@ class _HomeState extends State<Home> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 15)
                               .copyWith(top: 10),
-                          child: const AppText(
-                            text: "All Products",
-                            color: AppColors.primaryColor,
-                            weight: FontWeight.w500,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const AppText(
+                                text: "Featured Products",
+                                color: AppColors.primaryColor,
+                                weight: FontWeight.w500,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const AllProducts(),
+                                    ),
+                                  );
+                                },
+                                child: const AppText(
+                                  text: "See all",
+                                  color: AppColors.hintTextColor,
+                                  size: 15,
+                                ),
+                              )
+                            ],
                           ),
                         ),
                         Padding(
@@ -324,29 +308,12 @@ class _HomeState extends State<Home> {
                             width: MediaQuery.of(context).size.width,
                             child: GridView.builder(
                               scrollDirection: Axis.vertical,
-                              itemCount: productGrid.length,
+                              itemCount: 4,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2),
                               itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ProductDetail(),
-                                      ),
-                                    );
-                                  },
-                                  child: Card(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    elevation: 4,
-                                    child: productGrid[index],
-                                  ),
-                                );
+                                return productGrid[index];
                               },
                             ),
                           ),

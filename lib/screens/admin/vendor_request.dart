@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce/logic/deleteData.dart';
+import 'package:ecommerce/logic/updateData.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:ecommerce/utils/show_shanckbar.dart';
@@ -13,24 +15,18 @@ class VendorRequest extends StatefulWidget {
 
 class _VendorRequestState extends State<VendorRequest> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
+  final UpdateData updateData = UpdateData();
 
-  // Update the vendor status with to the UserID of the vendor
-  Future<void> updateRequest({required dynamic id}) {
-    return users.doc(id).update({'status': "verified"}).then((value) {
-      showSnackBar(context, "Vendor Account Verified");
-    }).catchError((error) {
-      showSnackBar(context, error.toString());
-    });
-  }
+  final DeleteData deleteData = DeleteData();
 
-  // This Delete only delets the Record of the vendor not the account itself.
-  Future<void> deleteRequest({required dynamic id}) {
-    return users.doc(id).delete().then((value) {
-      showSnackBar(context, "Request Removed!");
-    }).catchError((error) {
-      showSnackBar(context, error.toString());
-    });
-  }
+  // // This Delete only delets the Record of the vendor not the account itself.
+  // Future<void> deleteRequest({required dynamic id}) {
+  //   return users.doc(id).delete().then((value) {
+  //     showSnackBar(context, "Request Removed!");
+  //   }).catchError((error) {
+  //     showSnackBar(context, error.toString());
+  //   });
+  // }
 
   final Stream<QuerySnapshot> userStream = FirebaseFirestore.instance
       .collection('users')
@@ -105,7 +101,11 @@ class _VendorRequestState extends State<VendorRequest> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              updateRequest(id: document['userId']);
+                              updateData.updateVendorRequest(
+                                id: document['userId'],
+                                reference: users,
+                                context: context,
+                              );
                             });
                           },
                           child: const Icon(
@@ -117,7 +117,13 @@ class _VendorRequestState extends State<VendorRequest> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              deleteRequest(id: document['userId']);
+                              // deleteRequest(id: document['userId']);
+
+                              deleteData.deleteRequest(
+                                id: document['userId'],
+                                reference: users,
+                                context: context,
+                              );
                             });
                           },
                           child: const Icon(
