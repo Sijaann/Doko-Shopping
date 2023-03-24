@@ -263,7 +263,7 @@ class _ProductDetailState extends State<ProductDetail> {
                         'name': widget.name,
                         'price': widget.price,
                         'quantity': quantity,
-                        'images': widget.images,
+                        'images': widget.images[0],
                       };
 
                       setState(() {

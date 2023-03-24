@@ -57,17 +57,18 @@ class UpdateData {
   }
 
   // Add Products to Cart
-  Future<void> addProductToCart(
-      {required CollectionReference reference,
-      required dynamic userId,
-      required Map<String, dynamic> productDetails,
-      required BuildContext context}) {
+  Future<void> addProductToCart({
+    required CollectionReference reference,
+    required dynamic userId,
+    required Map<String, dynamic> productDetails,
+    required BuildContext context,
+  }) {
     return reference.doc(userId).update({
       'cart': FieldValue.arrayUnion([productDetails])
     }).then((value) {
       showSnackBar(context, "Added to cart!");
     }).onError((error, stackTrace) {
-      showSnackBar(context, error.toString());
+      debugPrint(error.toString());
     });
   }
 }
