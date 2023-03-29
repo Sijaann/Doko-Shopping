@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/logic/updateData.dart';
+import 'package:ecommerce/screens/user/buy_now.dart';
 import 'package:ecommerce/utils/app_button.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
-import 'package:ecommerce/utils/show_shanckbar.dart';
 import 'package:flutter/material.dart';
 
 class ProductDetail extends StatefulWidget {
@@ -16,6 +16,7 @@ class ProductDetail extends StatefulWidget {
   final double price;
   final String pId;
   final String uId;
+  final String vendorId;
 
   const ProductDetail({
     super.key,
@@ -25,6 +26,7 @@ class ProductDetail extends StatefulWidget {
     required this.price,
     required this.pId,
     required this.uId,
+    required this.vendorId,
   });
 
   @override
@@ -229,7 +231,20 @@ class _ProductDetailState extends State<ProductDetail> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   AppButton(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BuyNow(
+                            vendorId: widget.vendorId,
+                            image: widget.images[0],
+                            name: widget.name,
+                            price: widget.price,
+                            id: widget.pId,
+                          ),
+                        ),
+                      );
+                    },
                     color: AppColors.primaryColor,
                     height: 50,
                     radius: 0,
@@ -264,6 +279,7 @@ class _ProductDetailState extends State<ProductDetail> {
                         'price': widget.price,
                         'quantity': quantity,
                         'images': widget.images[0],
+                        'vendor': widget.vendorId,
                       };
 
                       setState(() {

@@ -71,4 +71,23 @@ class UpdateData {
       debugPrint(error.toString());
     });
   }
+
+  Future<void> updateUserInfo({
+    required dynamic id,
+    required BuildContext context,
+    required CollectionReference reference,
+    required String name,
+    required String contact,
+    required String email,
+    required address,
+  }) {
+    return reference.doc(id).update({
+      'name': name,
+      'contact': contact,
+      'email': email,
+      'address': address,
+    }).then((value) {
+      showSnackBar(context, "Data Updated!");
+    });
+  }
 }

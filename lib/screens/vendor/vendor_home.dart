@@ -1,15 +1,12 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/logic/deleteData.dart';
 import 'package:ecommerce/logic/logout.dart';
-import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/screens/vendor/add_poduct.dart';
 import 'package:ecommerce/screens/vendor/update_product.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
-import 'package:ecommerce/utils/show_shanckbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

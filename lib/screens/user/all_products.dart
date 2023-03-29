@@ -69,6 +69,7 @@ class _AllProductsState extends State<AllProducts> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ProductDetail(
+                          vendorId: document['vendorId'],
                           uId: user.uid,
                           images: document['images'],
                           name: document['productName'] as String,

@@ -5,17 +5,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecommerce/utils/colors.dart';
 
 class AppTextField extends StatelessWidget {
-  final String? hintText;
+  final String? labelText;
   final bool hide;
   final Icon? leadingIcon;
   final IconButton? iconButton;
   final double radius;
   final TextEditingController? controller;
   final TextInputType? type;
+  final String hintText;
   final int? maxLines;
   const AppTextField({
     Key? key,
-    this.hintText,
+    this.labelText,
     required this.hide,
     this.leadingIcon,
     this.iconButton,
@@ -23,6 +24,7 @@ class AppTextField extends StatelessWidget {
     this.controller,
     this.type = TextInputType.text,
     this.maxLines = 1,
+    required this.hintText,
   }) : super(key: key);
 
   @override
@@ -38,12 +40,13 @@ class AppTextField extends StatelessWidget {
       keyboardType: type,
       obscureText: hide,
       decoration: InputDecoration(
-        labelText: hintText,
-        // hintText: hintText,
+        labelText: labelText,
+        hintText: hintText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radius),
         ),
         hintStyle: GoogleFonts.montserrat(
+          fontSize: 15,
           color: AppColors.hintTextColor,
         ),
         enabledBorder: OutlineInputBorder(

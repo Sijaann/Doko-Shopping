@@ -227,6 +227,7 @@ class _HomeState extends State<Home> {
                         price: document['price'],
                         pId: document['productId'],
                         uId: user.uid,
+                        vendorId: document['vendorId'],
                       ),
                     ),
                   );
