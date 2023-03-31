@@ -24,6 +24,7 @@ class _CartState extends State<Cart> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List cartList = [];
+  var cart;
 
   // Get Items from cart field
   void getCartItems() {
@@ -32,7 +33,7 @@ class _CartState extends State<Cart> {
     docRef.get().then((DocumentSnapshot document) {
       final data = document.data() as Map<String, dynamic>;
 
-      final cart = data['cart'] as List<dynamic>;
+      cart = data['cart'] as List<dynamic>;
 
       for (var item in cart) {
         cartList.add(item);
@@ -57,7 +58,7 @@ class _CartState extends State<Cart> {
             totalCartQuantity + (cartList[i]['quantity'] as int);
 
         total = total + (totalCartQuantity * cartList[i]['price']);
-        setState(() {});
+        // setState(() {});
       }
     }
   }
@@ -106,7 +107,7 @@ class _CartState extends State<Cart> {
   @override
   Widget build(BuildContext context) {
     // getCartItems();
-    getTotalCartPrice();
+    // getTotalCartPrice();
     return Scaffold(
       appBar: AppBar(
         title: const Padding(
@@ -148,158 +149,175 @@ class _CartState extends State<Cart> {
                     color: AppColors.primaryColor,
                   ),
                 )
-              : Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.62,
-                          child: ListView.builder(
-                            itemCount: cartList.length,
-                            itemBuilder: (context, index) {
-                              return Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                elevation: 4,
-                                child: ListTile(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  leading: Image.memory(
-                                    base64Decode(
-                                      cartList[index]['images'],
+              : (cart == null)
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.62,
+                              child: ListView.builder(
+                                itemCount: cartList.length,
+                                itemBuilder: (context, index) {
+                                  return Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                  ),
-                                  title: AppText(
-                                    text: cartList[index]['name'],
-                                    color: AppColors.primaryColor,
+                                    elevation: 4,
+                                    child: ListTile(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      leading: Image.memory(
+                                        base64Decode(
+                                          cartList[index]['images'],
+                                        ),
+                                      ),
+                                      title: AppText(
+                                        text: cartList[index]['name'],
+                                        color: AppColors.primaryColor,
+                                        size: 16,
+                                      ),
+                                      subtitle: AppText(
+                                        text: "Rs. ${cartList[index]['price']}",
+                                        color: AppColors.hintTextColor,
+                                        size: 15,
+                                      ),
+                                      trailing: SizedBox(
+                                        width: 70,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () async {
+                                                if (cartList[index]
+                                                        ['quantity'] >
+                                                    1) {
+                                                  await _decreaseProductQuantity(
+                                                      index);
+                                                  setState(() {
+                                                    cartList[index]
+                                                        ['quantity'] -= 1;
+                                                    cartList.clear();
+                                                    total = 0.0;
+                                                    getCartItems();
+                                                  });
+                                                }
+                                                if (cartList[index]
+                                                        ['quantity'] <=
+                                                    1) {
+                                                  setState(() {
+                                                    _deleteCartItem(index);
+                                                    cartList.clear();
+                                                    total = 0.0;
+                                                    getCartItems();
+                                                  });
+                                                }
+                                              },
+                                              child: const Icon(
+                                                Icons
+                                                    .remove_circle_outline_outlined,
+                                                size: 18,
+                                              ),
+                                            ),
+                                            AppText(
+                                              text:
+                                                  "${cartList[index]['quantity']}",
+                                              color: AppColors.primaryColor,
+                                              size: 18,
+                                            ),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                await _incrementProductQuantity(
+                                                    index);
+                                                setState(() {
+                                                  cartList[index]['quantity'] +=
+                                                      1;
+                                                  cartList.clear();
+                                                  total = 0.0;
+                                                  getCartItems();
+                                                });
+                                              },
+                                              child: const Icon(
+                                                Icons
+                                                    .add_circle_outline_rounded,
+                                                size: 18,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 5),
+                              child: Divider(
+                                thickness: 2,
+                                color: AppColors.hintTextColor,
+                              ),
+                            ),
+                            Container(
+                              width: double.infinity,
+                              height: 55,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryColor,
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  const AppText(
+                                    text: "Total",
+                                    color: AppColors.secondaryColor,
                                     size: 16,
                                   ),
-                                  subtitle: AppText(
-                                    text: "Rs. ${cartList[index]['price']}",
-                                    color: AppColors.hintTextColor,
-                                    size: 15,
+                                  const VerticalDivider(
+                                    // height: ,
+                                    thickness: 2,
+                                    color: AppColors.secondaryColor,
                                   ),
-                                  trailing: SizedBox(
-                                    width: 70,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            if (cartList[index]['quantity'] >=
-                                                1) {
-                                              await _decreaseProductQuantity(
-                                                  index);
-                                              setState(() {
-                                                cartList[index]['quantity'] -=
-                                                    1;
-                                              });
-                                            }
-                                            if (cartList[index]['quantity'] <
-                                                1) {
-                                              setState(() {
-                                                _deleteCartItem(index);
-                                              });
-                                            }
-                                          },
-                                          child: const Icon(
-                                            Icons
-                                                .remove_circle_outline_outlined,
-                                            size: 18,
-                                          ),
-                                        ),
-                                        AppText(
-                                          text:
-                                              "${cartList[index]['quantity']}",
-                                          color: AppColors.primaryColor,
-                                          size: 18,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () async {
-                                            await _incrementProductQuantity(
-                                                index);
-                                            setState(() {
-                                              cartList[index]['quantity'] += 1;
-                                              total;
-                                            });
-                                          },
-                                          child: const Icon(
-                                            Icons.add_circle_outline_rounded,
-                                            size: 18,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5),
-                          child: Divider(
-                            thickness: 2,
-                            color: AppColors.hintTextColor,
-                          ),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          height: 55,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryColor,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              const AppText(
-                                text: "Total",
-                                color: AppColors.secondaryColor,
-                                size: 16,
+                                  AppText(
+                                    text: "Rs. $total",
+                                    color: AppColors.secondaryColor,
+                                    size: 16,
+                                  )
+                                ],
                               ),
-                              const VerticalDivider(
-                                // height: ,
-                                thickness: 2,
-                                color: AppColors.secondaryColor,
-                              ),
-                              AppText(
-                                text: "Rs. $total",
-                                color: AppColors.secondaryColor,
-                                size: 16,
-                              )
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: AppButton(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const Checkout(),
-                                ),
-                              );
-                            },
-                            color: AppColors.primaryColor,
-                            height: 50,
-                            radius: 15,
-                            child: const AppText(
-                              text: "Proceed to check out",
-                              color: AppColors.secondaryColor,
-                              size: 15,
                             ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: AppButton(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const Checkout(),
+                                    ),
+                                  );
+                                },
+                                color: AppColors.primaryColor,
+                                height: 50,
+                                radius: 15,
+                                child: const AppText(
+                                  text: "Proceed to check out",
+                                  color: AppColors.secondaryColor,
+                                  size: 15,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
         },
       ),
     );

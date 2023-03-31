@@ -71,6 +71,7 @@ class _BuyNowState extends State<BuyNow> {
   }) async {
     try {
       await reference.doc().set({
+        'serviceTax': widget.price * 0.01.ceilToDouble(),
         'vendorId': widget.vendorId,
         'products': [
           {
@@ -82,14 +83,14 @@ class _BuyNowState extends State<BuyNow> {
           }
         ],
         'userId': user.uid,
-        'grandTotal': widget.price,
+        'grandTotal': widget.price + (widget.price * 0.01).ceilToDouble(),
         'address': addressController.text,
         'name': name,
         'contact': contact,
         'email': email,
       }).then((value) {
         Navigator.pop(context);
-        showSnackBar(context, "Order Successfully Placed!");
+        showSnackBar(context, "Order Placed Successfully!");
       });
     } catch (error) {
       debugPrint(error.toString());
@@ -98,7 +99,6 @@ class _BuyNowState extends State<BuyNow> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getUserData();
   }
@@ -223,7 +223,7 @@ class _BuyNowState extends State<BuyNow> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Container(
+                      child: SizedBox(
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.2,
                         // color: Colors.amber,
@@ -231,7 +231,7 @@ class _BuyNowState extends State<BuyNow> {
                           children: [
                             Row(
                               children: [
-                                Container(
+                                SizedBox(
                                   height: 100,
                                   width: 100,
                                   // color: Colors.red,
@@ -245,9 +245,9 @@ class _BuyNowState extends State<BuyNow> {
                                 Padding(
                                   padding:
                                       const EdgeInsets.symmetric(horizontal: 5),
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.618,
+                                  child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.6,
                                     height: 100,
                                     // color: Colors.green,
                                     child: Column(
@@ -260,6 +260,7 @@ class _BuyNowState extends State<BuyNow> {
                                           text: widget.name,
                                           color: AppColors.primaryColor,
                                           size: 16,
+                                          maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         Row(
@@ -292,7 +293,7 @@ class _BuyNowState extends State<BuyNow> {
                                 color: AppColors.hintTextColor,
                               ),
                             ),
-                            Container(
+                            SizedBox(
                               width: MediaQuery.of(context).size.width,
                               height:
                                   MediaQuery.of(context).size.height * 0.035,
@@ -322,6 +323,62 @@ class _BuyNowState extends State<BuyNow> {
                       ),
                     ),
                   ),
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 10),
+                            child: AppText(
+                              text: "Order Summary",
+                              color: AppColors.primaryColor,
+                              weight: FontWeight.w500,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const AppText(
+                                text: "Gross Total",
+                                color: AppColors.primaryColor,
+                                size: 16,
+                              ),
+                              AppText(
+                                text: widget.price.toString(),
+                                color: AppColors.primaryColor,
+                                size: 15,
+                              )
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const AppText(
+                                  text: "Sercice Tax (1.5%)",
+                                  color: AppColors.primaryColor,
+                                  size: 15,
+                                ),
+                                AppText(
+                                  text: (widget.price * 0.01)
+                                      .ceilToDouble()
+                                      .toString(),
+                                  color: AppColors.primaryColor,
+                                  size: 15,
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
@@ -332,52 +389,58 @@ class _BuyNowState extends State<BuyNow> {
               height: 65,
               width: MediaQuery.of(context).size.width,
               color: AppColors.primaryColor,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  SizedBox(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          children: [
-                            const AppText(
-                              text: "Total: ",
-                              color: AppColors.secondaryColor,
-                              size: 18,
-                            ),
-                            AppText(
-                              text: "Rs. ${widget.price}",
-                              color: Colors.red,
-                              size: 18,
-                              weight: FontWeight.w600,
-                            )
-                          ],
-                        ),
-                        const AppText(
-                          text: "All taxex included",
-                          color: AppColors.hintTextColor,
-                          size: 12,
-                        )
-                      ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              const AppText(
+                                text: "Total: ",
+                                color: AppColors.secondaryColor,
+                                size: 16,
+                              ),
+                              AppText(
+                                text:
+                                    "Rs. ${widget.price + (widget.price * 0.01)}",
+                                color: Colors.red,
+                                size: 17,
+                                weight: FontWeight.w600,
+                              )
+                            ],
+                          ),
+                          const AppText(
+                            text: "All taxex included",
+                            color: AppColors.hintTextColor,
+                            size: 12,
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  AppButton(
-                    onTap: () {
-                      if (_formKey.currentState!.validate()) {
-                        placeOrder(reference: orders, context: context);
-                      }
-                    },
-                    color: AppColors.secondaryColor,
-                    height: 45,
-                    radius: 10,
-                    child: const AppText(
-                      text: "Place Order",
-                      color: AppColors.primaryColor,
-                    ),
-                  )
-                ],
+                    AppButton(
+                      onTap: () {
+                        if (_formKey.currentState!.validate()) {
+                          placeOrder(reference: orders, context: context);
+                        }
+                      },
+                      color: AppColors.secondaryColor,
+                      height: 45,
+                      radius: 10,
+                      child: const AppText(
+                        text: "Place Order",
+                        color: AppColors.primaryColor,
+                        size: 15,
+                        weight: FontWeight.w500,
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           )

@@ -102,6 +102,7 @@ class _AllProductsState extends State<AllProducts> {
             padding: const EdgeInsets.symmetric(horizontal: 7)
                 .copyWith(top: 5, bottom: 10),
             child: GridView.builder(
+              physics: const BouncingScrollPhysics(),
               itemCount: productGrid.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2),

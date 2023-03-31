@@ -226,12 +226,13 @@ class _ProfileState extends State<Profile> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    const Icon(Icons.person),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Icon(Icons.person),
+                      SizedBox(
                         height: 55,
                         width: MediaQuery.of(context).size.width * 0.81,
                         child: AppTextField(
@@ -241,19 +242,20 @@ class _ProfileState extends State<Profile> {
                           hintText: "Name",
                           labelText: "Name",
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    const Icon(Icons.phone),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Icon(Icons.phone),
+                      SizedBox(
                         height: 55,
                         width: MediaQuery.of(context).size.width * 0.81,
                         child: AppTextField(
@@ -264,18 +266,19 @@ class _ProfileState extends State<Profile> {
                           labelText: "Contact",
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    const Icon(Icons.email),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Icon(Icons.email),
+                      SizedBox(
                         height: 55,
                         width: MediaQuery.of(context).size.width * 0.81,
                         child: AppTextField(
@@ -286,18 +289,19 @@ class _ProfileState extends State<Profile> {
                           labelText: "Email",
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Row(
-                  children: [
-                    const Icon(Icons.location_on),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Icon(Icons.location_on),
+                      SizedBox(
                         height: 55,
                         width: MediaQuery.of(context).size.width * 0.81,
                         child: AppTextField(
@@ -308,8 +312,8 @@ class _ProfileState extends State<Profile> {
                           labelText: "Address",
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Padding(

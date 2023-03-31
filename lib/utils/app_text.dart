@@ -8,6 +8,7 @@ class AppText extends StatelessWidget {
   final FontWeight? weight;
   final FontStyle? style;
   final TextOverflow? overflow;
+  final int? maxLines;
   const AppText({
     super.key,
     required this.text,
@@ -16,6 +17,7 @@ class AppText extends StatelessWidget {
     this.weight = FontWeight.normal,
     this.style = FontStyle.normal,
     this.overflow = TextOverflow.clip,
+    this.maxLines,
   });
 
   @override
@@ -23,6 +25,7 @@ class AppText extends StatelessWidget {
     return Text(
       text,
       overflow: overflow,
+      maxLines: maxLines,
       style: GoogleFonts.montserrat(
         color: color,
         fontSize: size,
