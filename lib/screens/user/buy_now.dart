@@ -70,7 +70,7 @@ class _BuyNowState extends State<BuyNow> {
     // required double total,
   }) async {
     try {
-      await reference.doc().set({
+      await reference.add({
         'serviceTax': widget.price * 0.01.ceilToDouble(),
         'vendorId': widget.vendorId,
         'products': [
@@ -88,7 +88,34 @@ class _BuyNowState extends State<BuyNow> {
         'name': name,
         'contact': contact,
         'email': email,
-      }).then((value) {
+        'date': DateTime.now().toString(),
+      }).then((value) async {
+        Map<String, dynamic> vendorOrderDetails = {
+          'pId': widget.id,
+          'quantity': widget.quantity,
+          'price': widget.price,
+          'userId': user.uid,
+        };
+        print(vendorOrderDetails);
+
+        final vendorOrderRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.vendorId)
+            .collection('orders')
+            .doc(value.id);
+
+        await vendorOrderRef.set({
+          'date': DateTime.now(),
+        }).then((value) async {
+          await vendorOrderRef.update({
+            'products': FieldValue.arrayUnion([vendorOrderDetails]),
+          }).onError((error, stackTrace) {
+            debugPrint(error.toString());
+          });
+        }).onError((error, stackTrace) {
+          debugPrint(error.toString());
+        });
+
         Navigator.pop(context);
         showSnackBar(context, "Order Placed Successfully!");
       });

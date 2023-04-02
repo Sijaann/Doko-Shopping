@@ -86,15 +86,28 @@ class _CheckoutState extends State<Checkout> {
   Future<void> placeOrder({
     required CollectionReference reference,
     required BuildContext context,
-    // required String vendorId,
-    // required List products,
-    // required String userId,
-    // required double total,
   }) async {
     try {
+      /**
+       * vendorProducts={
+       * "vendorId": [
+       *    {"pId:": id, 'quantity': quantity, ..}, 
+       *    {"pId:": id, 'quantity': quantity, ..},
+       *   ]
+       * }
+       */
+
+      final vendorProducts = <String, List<Map<String, dynamic>>>{};
+      for (final cartItem in cartList) {
+        final vendorId = cartItem['vendor'];
+        vendorProducts.putIfAbsent(vendorId, () => []);
+
+        // Adds cart Items of respective cendor to the List
+        vendorProducts[vendorId]!.add(cartItem);
+      }
+
       await reference.add({
         'serviceTax': (total * 0.01).ceilToDouble(),
-        // 'vendorId': widget.vendorId,
         'products': [],
         'userId': user.uid,
         'grandTotal': total + (total * 0.02).ceilToDouble(),
@@ -102,21 +115,123 @@ class _CheckoutState extends State<Checkout> {
         'name': name,
         'contact': contact,
         'email': email,
-      }).then((value) {
-        for (int i = 0; i < cartList.length; i++) {
-          reference.doc(value.id).update({
-            'products': FieldValue.arrayUnion([cartList[i]])
-          }).onError((error, stackTrace) {
-            debugPrint(error.toString());
+        'date': DateTime.now().toString(),
+      }).then((value) async {
+        for (final vendorId in vendorProducts.keys) {
+          final vendorOrderRef = FirebaseFirestore.instance
+              .collection('users')
+              .doc(vendorId)
+              .collection('orders')
+              .doc(value.id);
+
+          final vendorOrderDetails = vendorProducts[vendorId]!
+              .map((cartItem) => {
+                    'pId': cartItem['pId'],
+                    'quantity': cartItem['quantity'],
+                    'price': cartItem['price'],
+                    'userId': user.uid,
+                  })
+              .toList();
+
+          await vendorOrderRef.set({
+            'date': DateTime.now().toString(),
+          }).then((value) async {
+            await vendorOrderRef.update({
+              'products': FieldValue.arrayUnion(vendorOrderDetails),
+            }).onError((error, stackTrace) {
+              debugPrint(error.toString());
+            });
           });
         }
-        Navigator.pop(context);
-        showSnackBar(context, "Order Placed Successfully!");
+
+        final allOrderDetails = cartList
+            .map((cartItem) => {
+                  'pId': cartItem['pId'],
+                  'name': cartItem['name'],
+                  'quantity': cartItem['quantity'],
+                  'price': cartItem['price'],
+                  'vendor': cartItem['vendor'],
+                })
+            .toList();
+
+        await reference.doc(value.id).update({
+          'products': FieldValue.arrayUnion(allOrderDetails),
+        }).then((value) async {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'cart': FieldValue.arrayRemove(cartList)});
+        }).onError((error, stackTrace) {
+          debugPrint(error.toString());
+        });
       });
+
+      Navigator.pop(context);
+      showSnackBar(context, "Order Placed Successfully!");
     } catch (error) {
       debugPrint(error.toString());
     }
   }
+
+  // Future<void> placeOrder({
+  //   required CollectionReference reference,
+  //   required BuildContext context,
+  // }) async {
+  //   try {
+  //     await reference.add({
+  //       'serviceTax': (total * 0.01).ceilToDouble(),
+  //       'products': [],
+  //       'userId': user.uid,
+  //       'grandTotal': total + (total * 0.02).ceilToDouble(),
+  //       'address': addressController.text,
+  //       'name': name,
+  //       'contact': contact,
+  //       'email': email,
+  //     }).then((value) async {
+  //       for (int i = 0; i < cartList.length; i++) {
+  //         Map<String, dynamic> orderDetails = {
+  //           'pId': cartList[i]['pId'],
+  //           'quantity': cartList[i]['quantity'],
+  //           'price': cartList[i]['price'],
+  //           'userId': user.uid,
+  //         };
+
+  //         print(orderDetails);
+
+  //         final vendorId = cartList[i]['vendor'];
+  //         final orderId = value.id;
+  //         final vendorOrderRef = FirebaseFirestore.instance
+  //             .collection('users')
+  //             .doc(vendorId)
+  //             .collection('orders')
+  //             .doc(orderId);
+
+  //         await vendorOrderRef.set({}).then((value) async {
+  //           await vendorOrderRef.update({
+  //             'products': FieldValue.arrayUnion([orderDetails])
+  //           }).onError((error, stackTrace) {
+  //             debugPrint(error.toString());
+  //           });
+  //         });
+  //         // orderDetails.clear();
+
+  //         await reference.doc(orderId).update(
+  //           {
+  //             'products': FieldValue.arrayUnion(
+  //               [cartList[i]],
+  //             ),
+  //           },
+  //         ).onError((error, stackTrace) {
+  //           debugPrint(error.toString());
+  //         });
+
+  //         orderDetails.clear();
+  //       }
+  //     });
+  //   } catch (error) {
+  //     debugPrint(error.toString());
+  //   }
+  // }
 
   @override
   void initState() {
@@ -295,19 +410,24 @@ class _CheckoutState extends State<Checkout> {
                                                       .spaceBetween,
                                               children: [
                                                 AppText(
-                                                  text: cartList[index]['price']
-                                                      .toString(),
+                                                  text:
+                                                      "Rs. ${cartList[index]['price']}",
                                                   color: AppColors.primaryColor,
                                                   weight: FontWeight.bold,
                                                   size: 16,
                                                 ),
-                                                AppText(
-                                                  text:
-                                                      "Qty: ${cartList[index]['quantity']}",
-                                                  color:
-                                                      AppColors.hintTextColor,
-                                                  weight: FontWeight.w500,
-                                                  size: 16,
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 20),
+                                                  child: AppText(
+                                                    text:
+                                                        "Qty: ${cartList[index]['quantity']}",
+                                                    color:
+                                                        AppColors.hintTextColor,
+                                                    weight: FontWeight.w500,
+                                                    size: 16,
+                                                  ),
                                                 ),
                                               ],
                                             )
@@ -396,9 +516,7 @@ class _CheckoutState extends State<Checkout> {
                                     size: 15,
                                   ),
                                   AppText(
-                                    text: (total * 0.01)
-                                        .ceilToDouble()
-                                        .toString(),
+                                    text: (total * 0.01).round().toString(),
                                     color: AppColors.primaryColor,
                                     size: 15,
                                   ),
@@ -438,8 +556,7 @@ class _CheckoutState extends State<Checkout> {
                                 size: 16,
                               ),
                               AppText(
-                                text:
-                                    "Rs. ${total + (total * 0.02).ceilToDouble()}",
+                                text: "Rs. ${total + (total * 0.01).round()}",
                                 color: Colors.red,
                                 size: 17,
                                 weight: FontWeight.w600,

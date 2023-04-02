@@ -69,7 +69,11 @@ class _AddProductState extends State<AddProduct> {
 
       for (String path in imagePaths) {
         int pathLength = path.length;
-        imageFiles.add(File(path.substring(2, pathLength - 1)));
+        imageFiles.add(
+          File(
+            path.substring(2, pathLength - 1),
+          ),
+        );
         // print(imageFiles);
       }
 
