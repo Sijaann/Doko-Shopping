@@ -43,7 +43,9 @@ dependencies:
   smooth_page_indicator: ^1.0.0
   shared_preferences: ^2.0.18
   carousel_slider: ^4.2.1
-  flutter_bloc: ^8.1.2
+  intl: ^0.17.0
+  khalti_flutter: ^2.2.1
+
 
 dev_dependencies:
   flutter_test:

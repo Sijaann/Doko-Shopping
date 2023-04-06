@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/utils/show_shanckbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:khalti_flutter/khalti_flutter.dart';
 
 import '../../utils/app_button.dart';
 import '../../utils/app_text.dart';
@@ -42,8 +44,10 @@ class _BuyNowState extends State<BuyNow> {
   final CollectionReference orders =
       FirebaseFirestore.instance.collection('orders');
 
+  String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
   String name = "";
-  // String address = "";
+  String paymentID = "";
   String contact = "";
   String email = "";
   void getUserData() async {
@@ -88,7 +92,8 @@ class _BuyNowState extends State<BuyNow> {
         'name': name,
         'contact': contact,
         'email': email,
-        'date': DateTime.now().toString(),
+        'date': formattedDate,
+        'paymentId': paymentID,
       }).then((value) async {
         Map<String, dynamic> vendorOrderDetails = {
           'pId': widget.id,
@@ -105,7 +110,8 @@ class _BuyNowState extends State<BuyNow> {
             .doc(value.id);
 
         await vendorOrderRef.set({
-          'date': DateTime.now(),
+          'date': formattedDate,
+          'paymentId': paymentID,
         }).then((value) async {
           await vendorOrderRef.update({
             'products': FieldValue.arrayUnion([vendorOrderDetails]),
@@ -453,7 +459,71 @@ class _BuyNowState extends State<BuyNow> {
                     AppButton(
                       onTap: () {
                         if (_formKey.currentState!.validate()) {
-                          placeOrder(reference: orders, context: context);
+                          // placeOrder(reference: orders, context: context);
+                          KhaltiScope.of(context).pay(
+                            preferences: [
+                              PaymentPreference.khalti,
+                            ],
+                            config: PaymentConfig(
+                              amount: 1000,
+                              productIdentity: widget.id,
+                              productName: widget.name,
+                            ),
+                            onSuccess: (PaymentSuccessModel success) {
+                              showSnackBar(context, "Payment Successful !");
+                              paymentID = success.idx;
+                              print(paymentID);
+                              placeOrder(reference: orders, context: context);
+                            },
+                            onFailure: (PaymentFailureModel failure) {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: AppText(
+                                      text: failure.message,
+                                      color: Colors.red,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {},
+                                        child: const AppText(
+                                          text: "OK",
+                                          color: AppColors.primaryColor,
+                                          weight: FontWeight.w500,
+                                        ),
+                                      )
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            onCancel: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const AppText(
+                                      text: "Payment Canceled!",
+                                      color: Colors.red,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const AppText(
+                                          text: "OK",
+                                          color: AppColors.primaryColor,
+                                          weight: FontWeight.w500,
+                                        ),
+                                      )
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          );
                         }
                       },
                       color: AppColors.secondaryColor,

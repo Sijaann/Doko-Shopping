@@ -5,6 +5,7 @@ import 'package:ecommerce/utils/app_button.dart';
 import 'package:ecommerce/utils/app_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../utils/app_text.dart';
 import '../../utils/colors.dart';
@@ -24,6 +25,8 @@ class _CheckoutState extends State<Checkout> {
 
   final CollectionReference orders =
       FirebaseFirestore.instance.collection('orders');
+
+  String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   String name = "";
   // String address = "";
@@ -115,7 +118,7 @@ class _CheckoutState extends State<Checkout> {
         'name': name,
         'contact': contact,
         'email': email,
-        'date': DateTime.now().toString(),
+        'date': formattedDate,
       }).then((value) async {
         for (final vendorId in vendorProducts.keys) {
           final vendorOrderRef = FirebaseFirestore.instance
@@ -134,7 +137,7 @@ class _CheckoutState extends State<Checkout> {
               .toList();
 
           await vendorOrderRef.set({
-            'date': DateTime.now().toString(),
+            'date': formattedDate,
           }).then((value) async {
             await vendorOrderRef.update({
               'products': FieldValue.arrayUnion(vendorOrderDetails),

@@ -3,7 +3,6 @@ import 'package:ecommerce/screens/vendor/order_detail_screen.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class Orders extends StatefulWidget {
@@ -75,7 +74,7 @@ class _OrdersState extends State<Orders> {
                   ),
                   subtitle: AppText(
                     text:
-                        "Total Number of orders: ${document['products'].length}",
+                        "Total Number of items: ${document['products'].length}",
                     color: AppColors.hintTextColor,
                     size: 15,
                   ),
@@ -84,24 +83,32 @@ class _OrdersState extends State<Orders> {
               )
               .toList();
 
-          return Padding(
-            padding: const EdgeInsets.all(8),
-            child: ListView.builder(
-              itemCount: orderTiles.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 2,
-                    child: orderTiles[index],
+          return (orderTiles.isEmpty)
+              ? const Center(
+                  child: AppText(
+                    text: "No orders yet",
+                    color: AppColors.primaryColor,
+                    weight: FontWeight.w500,
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ListView.builder(
+                    itemCount: orderTiles.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 2,
+                          child: orderTiles[index],
+                        ),
+                      );
+                    },
                   ),
                 );
-              },
-            ),
-          );
         },
       ),
       // body: ,
