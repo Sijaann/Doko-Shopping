@@ -133,6 +133,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/utils/app_button.dart';
+import 'package:ecommerce/utils/show_shanckbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -158,6 +159,7 @@ class _OrderDetailsState extends State<OrderDetails> {
   List<dynamic> productDetail = [];
   List<dynamic> userDetail = [];
   String date = "";
+  String status = "";
 
   Future<void> getProductList() async {
     final docRef = FirebaseFirestore.instance
@@ -168,6 +170,7 @@ class _OrderDetailsState extends State<OrderDetails> {
 
     await docRef.get().then((value) {
       date = value.data()!['date'];
+      status = value.data()!['status'];
     });
 
     // print(date);
@@ -195,7 +198,7 @@ class _OrderDetailsState extends State<OrderDetails> {
           .then((value) {
         product = {
           'ProductName': value.data()!['productName'],
-          'image': value.data()!['images'][1],
+          'image': value.data()!['images'][0],
           'quantity': productList[i]['quantity'],
           'price': productList[i]['price'],
         };
@@ -220,6 +223,19 @@ class _OrderDetailsState extends State<OrderDetails> {
     // getOrderTotal();
   }
 
+  void productShipped() async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('orders')
+        .doc(widget.documentId)
+        .update({
+      'status': 'shipped',
+    });
+    Navigator.pop(context);
+    showSnackBar(context, "Order Marked as Shipped!");
+  }
+
   // @override
   // void initState() {
   //   super.initState();
@@ -229,15 +245,17 @@ class _OrderDetailsState extends State<OrderDetails> {
   double total = 0.0;
   // Add total price of the cart items
   void getOrderTotal() {
+    double totall = 0.0;
     if (productList.isNotEmpty) {
       for (int i = 0; i < productList.length; i++) {
         int totalCartQuantity = 0;
         totalCartQuantity =
             totalCartQuantity + (productList[i]['quantity'] as int);
 
-        total = total + (totalCartQuantity * productList[i]['price']);
+        totall = totall + (totalCartQuantity * productList[i]['price']);
       }
     }
+    total = totall;
     print(total);
   }
 
@@ -293,27 +311,55 @@ class _OrderDetailsState extends State<OrderDetails> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 10,
+                          ),
                           child: AppText(
                             text: "Order ID: ${widget.documentId}",
                             color: AppColors.primaryColor,
                             weight: FontWeight.w500,
-                            size: 18,
+                            maxLines: 2,
+                            size: 16,
                           ),
                         ),
-                        AppText(
-                          text: "Order Date: $date",
-                          color: AppColors.primaryColor,
-                          size: 15,
-                          weight: FontWeight.w500,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                          ),
                           child: AppText(
-                            text: "Orders",
+                            text: "Order Date: $date",
                             color: AppColors.primaryColor,
+                            size: 15,
                             weight: FontWeight.w500,
-                            size: 25,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const AppText(
+                                text: "Orders",
+                                color: AppColors.primaryColor,
+                                weight: FontWeight.w500,
+                                size: 25,
+                              ),
+                              (status == "pending")
+                                  ? AppText(
+                                      text: "Status: $status",
+                                      color: Colors.red,
+                                      weight: FontWeight.bold,
+                                      size: 16,
+                                    )
+                                  : AppText(
+                                      text: "Status: $status",
+                                      color: Colors.green,
+                                      weight: FontWeight.bold,
+                                      size: 16,
+                                    ),
+                            ],
                           ),
                         ),
                         (productList.isEmpty ||
@@ -346,9 +392,9 @@ class _OrderDetailsState extends State<OrderDetails> {
                                         ),
                                         leading: Image.memory(
                                           base64Decode(product['image']),
-                                          height: 120,
-                                          width: 120,
-                                          fit: BoxFit.contain,
+                                          // height: 120,
+                                          // width: 120,
+                                          fit: BoxFit.cover,
                                         ),
                                         title: AppText(
                                           text: product['ProductName'],
@@ -367,8 +413,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                                                       .spaceBetween,
                                               children: [
                                                 AppText(
-                                                  text: product['price']
-                                                      .toString(),
+                                                  text:
+                                                      "Rs. ${product['price']}",
                                                   color:
                                                       AppColors.hintTextColor,
                                                   size: 15,
@@ -382,7 +428,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                                 ),
                                               ],
                                             ),
-                                            Divider(
+                                            const Divider(
                                               color: AppColors.hintTextColor,
                                               thickness: 1,
                                             ),
@@ -401,7 +447,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                               size: 15,
                                               maxLines: 4,
                                               overflow: TextOverflow.ellipsis,
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -444,18 +490,24 @@ class _OrderDetailsState extends State<OrderDetails> {
                         ],
                       ),
                     ),
-                    AppButton(
-                      onTap: () {},
-                      color: Colors.green,
-                      height: 45,
-                      radius: 10,
-                      child: const AppText(
-                        text: "Shipped",
-                        color: AppColors.secondaryColor,
-                        weight: FontWeight.w500,
-                        size: 14,
-                      ),
-                    )
+                    (status == "pending")
+                        ? AppButton(
+                            onTap: () => productShipped(),
+                            color: Colors.green,
+                            height: 45,
+                            radius: 10,
+                            child: const AppText(
+                              text: "Ship Product",
+                              color: AppColors.secondaryColor,
+                              weight: FontWeight.w500,
+                              size: 14,
+                            ),
+                          )
+                        : const AppText(
+                            text: "Product(s) Shipped!",
+                            color: AppColors.secondaryColor,
+                            size: 15,
+                          ),
                   ],
                 ),
               ),

@@ -78,7 +78,15 @@ class _OrdersState extends State<Orders> {
                     color: AppColors.hintTextColor,
                     size: 15,
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios),
+                  trailing: (document['status'] == "pending")
+                      ? const CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.red,
+                        )
+                      : const CircleAvatar(
+                          radius: 8,
+                          backgroundColor: Colors.green,
+                        ),
                 ),
               )
               .toList();

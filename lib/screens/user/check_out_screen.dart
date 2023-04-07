@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/utils/app_button.dart';
@@ -6,6 +7,7 @@ import 'package:ecommerce/utils/app_textfield.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:khalti_flutter/khalti_flutter.dart';
 
 import '../../utils/app_text.dart';
 import '../../utils/colors.dart';
@@ -28,10 +30,20 @@ class _CheckoutState extends State<Checkout> {
 
   String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
+  final _formKey = GlobalKey<FormState>();
+  String paymentID = "";
+
   String name = "";
-  // String address = "";
   String contact = "";
   String email = "";
+
+  List cartList = [];
+
+  double total = 0.0;
+
+  String productId = "";
+  String productName = "";
+
   void getUserData() async {
     await FirebaseFirestore.instance
         .collection('users')
@@ -46,8 +58,6 @@ class _CheckoutState extends State<Checkout> {
       });
     });
   }
-
-  List cartList = [];
 
 // Get Items from cart field
   void getCartItems() {
@@ -71,7 +81,6 @@ class _CheckoutState extends State<Checkout> {
     });
   }
 
-  double total = 0.0;
   // Add total price of the cart items
   void getTotalCartPrice() {
     if (cartList.isNotEmpty) {
@@ -85,7 +94,117 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
-  // DocumentReference docRef =await reference;
+  void checkOrderQuantity(String productIdentity, String productName) async {
+    int count = 0;
+    for (int i = 0; i < cartList.length; i++) {
+      await FirebaseFirestore.instance
+          .collection("products")
+          .doc(cartList[i]['pId'])
+          .get()
+          .then((value) async {
+        if (value.data()!['quantity'] >= cartList[i]['quantity']) {
+          count++;
+
+          if (count == cartList.length) {
+            KhaltiScope.of(context).pay(
+              preferences: [
+                PaymentPreference.khalti,
+              ],
+              config: PaymentConfig(
+                amount: (total + (total * 0.01).round()).toInt() * 100,
+                productIdentity: productIdentity,
+                productName: productName,
+              ),
+              onSuccess: (PaymentSuccessModel success) async {
+                showSnackBar(context, "Payment Successful !");
+                paymentID = success.idx;
+                print(paymentID);
+
+                for (int i = 0; i < cartList.length; i++) {
+                  await FirebaseFirestore.instance
+                      .collection('products')
+                      .doc(cartList[i]['pId'])
+                      .update({
+                    'quantity':
+                        value.data()!['quantity'] - cartList[i]['quantity']
+                  });
+                }
+
+                placeOrder(reference: orders, context: context);
+
+                // checkOrderQuantity();
+              },
+              onFailure: (PaymentFailureModel failure) {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: AppText(
+                        text: failure.message,
+                        color: Colors.red,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {},
+                          child: const AppText(
+                            text: "OK",
+                            color: AppColors.primaryColor,
+                            weight: FontWeight.w500,
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                );
+              },
+              onCancel: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const AppText(
+                        text: "Payment Canceled!",
+                        color: Colors.red,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const AppText(
+                            text: "OK",
+                            color: AppColors.primaryColor,
+                            weight: FontWeight.w500,
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+            // for (int i = 0; i < cartList.length; i++) {
+            //   await FirebaseFirestore.instance
+            //       .collection("products")
+            //       .doc(cartList[i]['pId'])
+            //       .update({
+            //     'quantity': value.data()!['quantity'] - cartList[i]['quantity'],
+            //   });
+            // }
+          }
+          // placeOrder(
+          //   reference: orders,
+          //   context: context,
+          // );
+        } else {
+          showSnackBar(context,
+              "${value.data()!['productName']} quantity exceeds stock quantity!");
+          // throw ("Request Quantity Exceeded!");
+        }
+      });
+    }
+  }
+
   Future<void> placeOrder({
     required CollectionReference reference,
     required BuildContext context,
@@ -119,6 +238,9 @@ class _CheckoutState extends State<Checkout> {
         'contact': contact,
         'email': email,
         'date': formattedDate,
+        'paymentID': paymentID,
+        'productRandId': productId,
+        'productRandName': productName,
       }).then((value) async {
         for (final vendorId in vendorProducts.keys) {
           final vendorOrderRef = FirebaseFirestore.instance
@@ -138,6 +260,10 @@ class _CheckoutState extends State<Checkout> {
 
           await vendorOrderRef.set({
             'date': formattedDate,
+            'paymentId': paymentID,
+            'productRandId': productId,
+            'productRandName': productName,
+            'status': "pending",
           }).then((value) async {
             await vendorOrderRef.update({
               'products': FieldValue.arrayUnion(vendorOrderDetails),
@@ -167,74 +293,41 @@ class _CheckoutState extends State<Checkout> {
         }).onError((error, stackTrace) {
           debugPrint(error.toString());
         });
+
+        // for (int i = 0; i < cartList.length; i++) {
+        //   await FirebaseFirestore.instance
+        //       .collection("products")
+        //       .doc(cartList[i]['pId'])
+        //       .get()
+        //       .then((value) async {
+        //     await FirebaseFirestore.instance
+        //         .collection('products')
+        //         .doc(cartList[i]['pId'])
+        //         .update({
+        //       'quantity': value.data()!['quantity'] - cartList[i]['quantity']
+        //     });
+        //   });
+        // }
       });
 
       Navigator.pop(context);
-      showSnackBar(context, "Order Placed Successfully!");
     } catch (error) {
       debugPrint(error.toString());
     }
   }
 
-  // Future<void> placeOrder({
-  //   required CollectionReference reference,
-  //   required BuildContext context,
-  // }) async {
-  //   try {
-  //     await reference.add({
-  //       'serviceTax': (total * 0.01).ceilToDouble(),
-  //       'products': [],
-  //       'userId': user.uid,
-  //       'grandTotal': total + (total * 0.02).ceilToDouble(),
-  //       'address': addressController.text,
-  //       'name': name,
-  //       'contact': contact,
-  //       'email': email,
-  //     }).then((value) async {
-  //       for (int i = 0; i < cartList.length; i++) {
-  //         Map<String, dynamic> orderDetails = {
-  //           'pId': cartList[i]['pId'],
-  //           'quantity': cartList[i]['quantity'],
-  //           'price': cartList[i]['price'],
-  //           'userId': user.uid,
-  //         };
+  static const _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
 
-  //         print(orderDetails);
-
-  //         final vendorId = cartList[i]['vendor'];
-  //         final orderId = value.id;
-  //         final vendorOrderRef = FirebaseFirestore.instance
-  //             .collection('users')
-  //             .doc(vendorId)
-  //             .collection('orders')
-  //             .doc(orderId);
-
-  //         await vendorOrderRef.set({}).then((value) async {
-  //           await vendorOrderRef.update({
-  //             'products': FieldValue.arrayUnion([orderDetails])
-  //           }).onError((error, stackTrace) {
-  //             debugPrint(error.toString());
-  //           });
-  //         });
-  //         // orderDetails.clear();
-
-  //         await reference.doc(orderId).update(
-  //           {
-  //             'products': FieldValue.arrayUnion(
-  //               [cartList[i]],
-  //             ),
-  //           },
-  //         ).onError((error, stackTrace) {
-  //           debugPrint(error.toString());
-  //         });
-
-  //         orderDetails.clear();
-  //       }
-  //     });
-  //   } catch (error) {
-  //     debugPrint(error.toString());
-  //   }
-  // }
+  String getRandomString(int length) => String.fromCharCodes(
+        Iterable.generate(
+          length,
+          (_) => _chars.codeUnitAt(
+            _rnd.nextInt(_chars.length),
+          ),
+        ),
+      );
 
   @override
   void initState() {
@@ -305,12 +398,15 @@ class _CheckoutState extends State<Checkout> {
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: AppTextField(
-                                controller: addressController,
-                                hide: false,
-                                radius: 10,
-                                hintText: "Ex: Nadipur, Pokhara",
-                                labelText: "Delivery Address",
+                              child: Form(
+                                key: _formKey,
+                                child: AppTextField(
+                                  controller: addressController,
+                                  hide: false,
+                                  radius: 10,
+                                  hintText: "Ex: Nadipur, Pokhara",
+                                  labelText: "Delivery Address",
+                                ),
                               ),
                             ),
                             AppText(
@@ -576,7 +672,15 @@ class _CheckoutState extends State<Checkout> {
                     ),
                     AppButton(
                       onTap: () {
-                        placeOrder(reference: orders, context: context);
+                        // String totall = total.toString();
+                        // print(total.toInt().runtimeType);
+                        productId = getRandomString(20);
+
+                        productName = getRandomString(15);
+
+                        if (_formKey.currentState!.validate()) {
+                          checkOrderQuantity(productId, productName);
+                        }
                       },
                       color: AppColors.secondaryColor,
                       height: 45,

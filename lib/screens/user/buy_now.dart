@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce/logic/buyProduct.dart';
 import 'package:ecommerce/utils/show_shanckbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -36,20 +37,20 @@ class BuyNow extends StatefulWidget {
 
 class _BuyNowState extends State<BuyNow> {
   final _formKey = GlobalKey<FormState>();
-
   final TextEditingController addressController = TextEditingController();
-
   final User user = FirebaseAuth.instance.currentUser!;
-
   final CollectionReference orders =
       FirebaseFirestore.instance.collection('orders');
+  final BuyProduct buyProduct = BuyProduct();
 
   String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
   String name = "";
   String paymentID = "";
   String contact = "";
   String email = "";
+
+  bool inStock = false;
+
   void getUserData() async {
     await FirebaseFirestore.instance
         .collection('users')
@@ -65,75 +66,23 @@ class _BuyNowState extends State<BuyNow> {
     });
   }
 
-  Future<void> placeOrder({
-    required CollectionReference reference,
-    required BuildContext context,
-    // required String vendorId,
-    // required List products,
-    // required String userId,
-    // required double total,
-  }) async {
-    try {
-      await reference.add({
-        'serviceTax': widget.price * 0.01.ceilToDouble(),
-        'vendorId': widget.vendorId,
-        'products': [
-          {
-            'pId': widget.id,
-            'pName': widget.name,
-            'quantity': widget.quantity,
-            'price': widget.price,
-            'total': widget.quantity! * widget.price
-          }
-        ],
-        'userId': user.uid,
-        'grandTotal': widget.price + (widget.price * 0.01).ceilToDouble(),
-        'address': addressController.text,
-        'name': name,
-        'contact': contact,
-        'email': email,
-        'date': formattedDate,
-        'paymentId': paymentID,
-      }).then((value) async {
-        Map<String, dynamic> vendorOrderDetails = {
-          'pId': widget.id,
-          'quantity': widget.quantity,
-          'price': widget.price,
-          'userId': user.uid,
-        };
-        print(vendorOrderDetails);
-
-        final vendorOrderRef = FirebaseFirestore.instance
-            .collection('users')
-            .doc(widget.vendorId)
-            .collection('orders')
-            .doc(value.id);
-
-        await vendorOrderRef.set({
-          'date': formattedDate,
-          'paymentId': paymentID,
-        }).then((value) async {
-          await vendorOrderRef.update({
-            'products': FieldValue.arrayUnion([vendorOrderDetails]),
-          }).onError((error, stackTrace) {
-            debugPrint(error.toString());
-          });
-        }).onError((error, stackTrace) {
-          debugPrint(error.toString());
-        });
-
-        Navigator.pop(context);
-        showSnackBar(context, "Order Placed Successfully!");
-      });
-    } catch (error) {
-      debugPrint(error.toString());
-    }
+  void checkProductStock() async {
+    await FirebaseFirestore.instance
+        .collection('products')
+        .doc(widget.id)
+        .get()
+        .then((value) async {
+      if (value.data()!['quantity'] >= widget.quantity) {
+        inStock = true;
+      }
+    });
   }
 
   @override
   void initState() {
     super.initState();
     getUserData();
+    checkProductStock();
   }
 
   @override
@@ -394,14 +343,13 @@ class _BuyNowState extends State<BuyNow> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const AppText(
-                                  text: "Sercice Tax (1.5%)",
+                                  text: "Sercice Tax (1%)",
                                   color: AppColors.primaryColor,
                                   size: 15,
                                 ),
                                 AppText(
-                                  text: (widget.price * 0.01)
-                                      .ceilToDouble()
-                                      .toString(),
+                                  text:
+                                      (widget.price * 0.01).round().toString(),
                                   color: AppColors.primaryColor,
                                   size: 15,
                                 ),
@@ -441,7 +389,7 @@ class _BuyNowState extends State<BuyNow> {
                               ),
                               AppText(
                                 text:
-                                    "Rs. ${widget.price + (widget.price * 0.01)}",
+                                    "Rs. ${widget.price + (widget.price * 0.01).round()}",
                                 color: Colors.red,
                                 size: 17,
                                 weight: FontWeight.w600,
@@ -460,70 +408,92 @@ class _BuyNowState extends State<BuyNow> {
                       onTap: () {
                         if (_formKey.currentState!.validate()) {
                           // placeOrder(reference: orders, context: context);
-                          KhaltiScope.of(context).pay(
-                            preferences: [
-                              PaymentPreference.khalti,
-                            ],
-                            config: PaymentConfig(
-                              amount: 1000,
-                              productIdentity: widget.id,
-                              productName: widget.name,
-                            ),
-                            onSuccess: (PaymentSuccessModel success) {
-                              showSnackBar(context, "Payment Successful !");
-                              paymentID = success.idx;
-                              print(paymentID);
-                              placeOrder(reference: orders, context: context);
-                            },
-                            onFailure: (PaymentFailureModel failure) {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: AppText(
-                                      text: failure.message,
-                                      color: Colors.red,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {},
-                                        child: const AppText(
-                                          text: "OK",
-                                          color: AppColors.primaryColor,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      )
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            onCancel: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const AppText(
-                                      text: "Payment Canceled!",
-                                      color: Colors.red,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const AppText(
-                                          text: "OK",
-                                          color: AppColors.primaryColor,
-                                          weight: FontWeight.w500,
-                                        ),
-                                      )
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          );
+
+                          if (inStock) {
+                            KhaltiScope.of(context).pay(
+                              preferences: [
+                                PaymentPreference.khalti,
+                              ],
+                              config: PaymentConfig(
+                                amount: 1000,
+                                productIdentity: widget.id,
+                                productName: widget.name,
+                              ),
+                              onSuccess: (PaymentSuccessModel success) {
+                                showSnackBar(context, "Payment Successful !");
+                                paymentID = success.idx;
+                                print(paymentID);
+                                // placeOrder(reference: orders, context: context);
+                                buyProduct.buyNow(
+                                  reference: orders,
+                                  context: context,
+                                  serviceTax: widget.price,
+                                  vendorId: widget.vendorId,
+                                  pId: widget.id,
+                                  pName: widget.name,
+                                  quantity: widget.quantity!,
+                                  price: widget.price,
+                                  userId: user.uid,
+                                  address: addressController.text,
+                                  name: name,
+                                  contact: contact,
+                                  email: email,
+                                  date: formattedDate,
+                                  paymentId: paymentID,
+                                );
+                              },
+                              onFailure: (PaymentFailureModel failure) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: AppText(
+                                        text: failure.message,
+                                        color: Colors.red,
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {},
+                                          child: const AppText(
+                                            text: "OK",
+                                            color: AppColors.primaryColor,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        )
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              onCancel: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      title: const AppText(
+                                        text: "Payment Canceled!",
+                                        color: Colors.red,
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const AppText(
+                                            text: "OK",
+                                            color: AppColors.primaryColor,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        )
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          } else {
+                            showSnackBar(context, "Product Out of Stock !");
+                          }
                         }
                       },
                       color: AppColors.secondaryColor,
