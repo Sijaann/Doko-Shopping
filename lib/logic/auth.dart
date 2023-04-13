@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../screens/admin/admin_nav.dart';
 import '../screens/user/nav_page.dart';
@@ -14,7 +15,7 @@ class Auth {
       required String password,
       required BuildContext context}) async {
     try {
-      await auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -26,14 +27,17 @@ class Auth {
   }
 
   void getCurrentUser({required BuildContext context}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     final firebaseUser = FirebaseAuth.instance.currentUser;
     if (firebaseUser != null) {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(firebaseUser.uid)
           .get()
-          .then((value) {
+          .then((value) async {
         if (value.data()!['userType'] == "Admin") {
+          await prefs.setString("userRole", "Admin");
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -42,6 +46,8 @@ class Auth {
           );
         }
         if (value.data()!['userType'] == "User") {
+          await prefs.setString("userRole", "User");
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -50,6 +56,8 @@ class Auth {
           );
         }
         if (value.data()!['userType'] == "Vendor") {
+          await prefs.setString("userRole", "Vendor");
+
           if (value.data()!['userType'] == "Vendor" &&
               value.data()!['status'] == "verified") {
             Navigator.pushReplacement(

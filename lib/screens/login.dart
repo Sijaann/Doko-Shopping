@@ -1,4 +1,5 @@
 import 'package:ecommerce/screens/signup.dart';
+import 'package:ecommerce/screens/user/nav_page.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/app_textfield.dart';
 import 'package:ecommerce/utils/colors.dart';
@@ -178,6 +179,24 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                           ],
+                        ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const NavPage(),
+                                ),
+                              );
+                            },
+                            child: const AppText(
+                              text: "Skip",
+                              color: AppColors.hintTextColor,
+                              size: 18,
+                            ),
+                          ),
                         )
                       ],
                     ),

@@ -1,10 +1,6 @@
 import 'dart:async';
 
 import 'package:ecommerce/main.dart';
-import 'package:ecommerce/screens/admin/admin_nav.dart';
-import 'package:ecommerce/screens/login.dart';
-import 'package:ecommerce/screens/onboardingScreens/onBoardingScreen.dart';
-import 'package:ecommerce/screens/vendor/vendorNav.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +24,7 @@ class _SplashState extends State<Splash> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => OnBoardingScreen(),
+          builder: (context) => const RedirectPage(),
         ),
       );
     });
@@ -37,46 +33,47 @@ class _SplashState extends State<Splash> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: AppColors.primaryColor,
-            ),
-            child: Center(
-              child: Text(
-                "D",
-                style: GoogleFonts.montserrat(
-                  fontSize: 48,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontStyle: FontStyle.italic,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: AppColors.primaryColor,
+              ),
+              child: Center(
+                child: Text(
+                  "D",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 48,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
             ),
-          ),
-          const AppText(
-            text: "Doko",
-            color: AppColors.primaryColor,
-            size: 24,
-            style: FontStyle.italic,
-            weight: FontWeight.bold,
-          ),
-          const AppText(
-            text: "Shopping",
-            color: AppColors.primaryColor,
-            size: 16,
-            style: FontStyle.italic,
-            weight: FontWeight.bold,
-          )
-        ],
+            const AppText(
+              text: "Doko",
+              color: AppColors.primaryColor,
+              size: 24,
+              style: FontStyle.italic,
+              weight: FontWeight.bold,
+            ),
+            const AppText(
+              text: "Shopping",
+              color: AppColors.primaryColor,
+              size: 16,
+              style: FontStyle.italic,
+              weight: FontWeight.bold,
+            )
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

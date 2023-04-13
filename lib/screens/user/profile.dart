@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/logic/updateData.dart';
+import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/utils/app_button.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/app_textfield.dart';
@@ -15,7 +16,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final User user = FirebaseAuth.instance.currentUser!;
+  final User? user = FirebaseAuth.instance.currentUser;
   final CollectionReference reference =
       FirebaseFirestore.instance.collection('users');
 
@@ -26,14 +27,10 @@ class _ProfileState extends State<Profile> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
 
-  // String name = "";
-  // String address = "";
-  // String contact = "";
-  // String email = "";
   void getUserData() async {
     await FirebaseFirestore.instance
         .collection('users')
-        .doc(user.uid)
+        .doc(user!.uid)
         .get()
         .then((value) {
       setState(() {
@@ -45,23 +42,22 @@ class _ProfileState extends State<Profile> {
     });
   }
 
-  // void updateUserData() {
-  //   updateData.updateUserInfo(
-  //     id: user.uid,
-  //     context: context,
-  //     reference: reference,
-  //     name: nameController.text,
-  //     contact: contactController.text,
-  //     email: emailController.text,
-  //     address: addressController.text,
-  //   );
-  // }
+  bool signedIn = false;
+
+  void checkUserData() {
+    if (user != null) {
+      signedIn = true;
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getUserData();
+    checkUserData();
+    if (signedIn == true) {
+      getUserData();
+    }
   }
 
   @override
@@ -216,136 +212,170 @@ class _ProfileState extends State<Profile> {
       //     ),
       //   ),
       // ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(Icons.person),
-                      SizedBox(
-                        height: 55,
-                        width: MediaQuery.of(context).size.width * 0.81,
-                        child: AppTextField(
-                          controller: nameController,
-                          hide: false,
-                          radius: 10,
-                          hintText: "Name",
-                          labelText: "Name",
-                        ),
-                      )
-                    ],
+      body: (signedIn == false)
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const AppText(
+                    text: "Login to see user profile",
+                    color: AppColors.primaryColor,
+                    weight: FontWeight.w500,
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: AppButton(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Login(),
+                          ),
+                        );
+                      },
+                      color: AppColors.primaryColor,
+                      height: 50,
+                      radius: 10,
+                      child: const AppText(
+                        text: "Login",
+                        color: AppColors.secondaryColor,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(Icons.phone),
-                      SizedBox(
-                        height: 55,
-                        width: MediaQuery.of(context).size.width * 0.81,
-                        child: AppTextField(
-                          controller: contactController,
-                          hide: false,
-                          radius: 10,
-                          hintText: "Contact",
-                          labelText: "Contact",
+            )
+          : Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Icon(Icons.person),
+                            SizedBox(
+                              height: 55,
+                              width: MediaQuery.of(context).size.width * 0.81,
+                              child: AppTextField(
+                                controller: nameController,
+                                hide: false,
+                                radius: 10,
+                                hintText: "Name",
+                                labelText: "Name",
+                              ),
+                            )
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(Icons.email),
-                      SizedBox(
-                        height: 55,
-                        width: MediaQuery.of(context).size.width * 0.81,
-                        child: AppTextField(
-                          controller: emailController,
-                          hide: false,
-                          radius: 10,
-                          hintText: "Email",
-                          labelText: "Email",
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Icon(Icons.phone),
+                            SizedBox(
+                              height: 55,
+                              width: MediaQuery.of(context).size.width * 0.81,
+                              child: AppTextField(
+                                controller: contactController,
+                                hide: false,
+                                radius: 10,
+                                hintText: "Contact",
+                                labelText: "Contact",
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(Icons.location_on),
-                      SizedBox(
-                        height: 55,
-                        width: MediaQuery.of(context).size.width * 0.81,
-                        child: AppTextField(
-                          controller: addressController,
-                          hide: false,
-                          radius: 10,
-                          hintText: "Ex: Nadipur, Pokhara",
-                          labelText: "Address",
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Icon(Icons.email),
+                            SizedBox(
+                              height: 55,
+                              width: MediaQuery.of(context).size.width * 0.81,
+                              child: AppTextField(
+                                controller: emailController,
+                                hide: false,
+                                radius: 10,
+                                hintText: "Email",
+                                labelText: "Email",
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Icon(Icons.location_on),
+                            SizedBox(
+                              height: 55,
+                              width: MediaQuery.of(context).size.width * 0.81,
+                              child: AppTextField(
+                                controller: addressController,
+                                hide: false,
+                                radius: 10,
+                                hintText: "Ex: Nadipur, Pokhara",
+                                labelText: "Address",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: AppButton(
+                        onTap: () {
+                          // setState(() {
+                          //   updateUserData();
+                          // });
+                          updateData.updateUserInfo(
+                            id: user!.uid,
+                            context: context,
+                            reference: reference,
+                            name: nameController.text,
+                            contact: contactController.text,
+                            email: emailController.text,
+                            address: addressController.text,
+                          );
+                        },
+                        color: AppColors.primaryColor,
+                        height: 50,
+                        radius: 10,
+                        child: const AppText(
+                          text: "Update",
+                          color: AppColors.secondaryColor,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: AppButton(
-                  onTap: () {
-                    // setState(() {
-                    //   updateUserData();
-                    // });
-                    updateData.updateUserInfo(
-                      id: user.uid,
-                      context: context,
-                      reference: reference,
-                      name: nameController.text,
-                      contact: contactController.text,
-                      email: emailController.text,
-                      address: addressController.text,
-                    );
-                  },
-                  color: AppColors.primaryColor,
-                  height: 50,
-                  radius: 10,
-                  child: const AppText(
-                    text: "Update",
-                    color: AppColors.secondaryColor,
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

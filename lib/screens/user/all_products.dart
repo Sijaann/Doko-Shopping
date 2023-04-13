@@ -20,8 +20,22 @@ class _AllProductsState extends State<AllProducts> {
   final Stream<QuerySnapshot> productStream =
       FirebaseFirestore.instance.collection('products').snapshots();
 
-  final User user = FirebaseAuth.instance.currentUser!;
+  final User? user = FirebaseAuth.instance.currentUser;
 
+  bool signedIn = false;
+
+  void checkUserData() {
+    if (user != null) {
+      signedIn = true;
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkUserData();
+  }
   // CollectionReference products =
   //     FirebaseFirestore.instance.collection('products');
 
@@ -41,78 +55,153 @@ class _AllProductsState extends State<AllProducts> {
           ),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: productStream,
-        builder:
-            ((BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: AppText(
-                text: "Something went wrong",
-                color: AppColors.primaryColor,
-                weight: FontWeight.w500,
-              ),
-            );
-          }
+      body: (signedIn == false)
+          ? StreamBuilder<QuerySnapshot>(
+              stream: productStream,
+              builder: ((BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: AppText(
+                      text: "Something went wrong",
+                      color: AppColors.primaryColor,
+                      weight: FontWeight.w500,
+                    ),
+                  );
+                }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
 
-          final List<GestureDetector> productGrid = snapshot.data!.docs
-              .map(
-                (DocumentSnapshot document) => GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProductDetail(
-                          vendorId: document['vendorId'],
-                          uId: user.uid,
-                          images: document['images'],
-                          name: document['productName'] as String,
-                          description: document['description'] as String,
-                          price: document['price'] as double,
-                          pId: document['productId'],
+                final List<GestureDetector> productGrid = snapshot.data!.docs
+                    .map(
+                      (DocumentSnapshot document) => GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetail(
+                                vendorId: document['vendorId'],
+                                uId: "",
+                                images: document['images'],
+                                name: document['productName'] as String,
+                                description: document['description'] as String,
+                                price: document['price'] as double,
+                                pId: document['productId'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: ProductGrid(
+                          imageString: document['images'][0],
+                          name: document['productName'],
+                          price: document['price'],
+                          height: MediaQuery.of(context).size.height * 0.0758,
                         ),
                       ),
-                    );
-                  },
-                  child: ProductGrid(
-                    imageString: document['images'][0],
-                    name: document['productName'],
-                    price: document['price'],
-                    height: MediaQuery.of(context).size.height * 0.0758,
-                  ),
-                ),
-              )
-              .toList();
+                    )
+                    .toList();
 
-          // return (storeDocs.isEmpty)
-          //     ? const Center(
-          //         child: AppText(
-          //           text: "No Products Listed",
-          //           color: AppColors.primaryColor,
-          //           weight: FontWeight.w600,
-          //         ),
-          //       )
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 7)
-                .copyWith(top: 5, bottom: 10),
-            child: GridView.builder(
-              physics: const BouncingScrollPhysics(),
-              itemCount: productGrid.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2),
-              itemBuilder: (context, index) {
-                return productGrid[index];
-              },
+                // return (storeDocs.isEmpty)
+                //     ? const Center(
+                //         child: AppText(
+                //           text: "No Products Listed",
+                //           color: AppColors.primaryColor,
+                //           weight: FontWeight.w600,
+                //         ),
+                //       )
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 7)
+                      .copyWith(top: 5, bottom: 10),
+                  child: GridView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: productGrid.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2),
+                    itemBuilder: (context, index) {
+                      return productGrid[index];
+                    },
+                  ),
+                );
+              }),
+            )
+          : StreamBuilder<QuerySnapshot>(
+              stream: productStream,
+              builder: ((BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: AppText(
+                      text: "Something went wrong",
+                      color: AppColors.primaryColor,
+                      weight: FontWeight.w500,
+                    ),
+                  );
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final List<GestureDetector> productGrid = snapshot.data!.docs
+                    .map(
+                      (DocumentSnapshot document) => GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetail(
+                                vendorId: document['vendorId'],
+                                uId: user!.uid,
+                                images: document['images'],
+                                name: document['productName'] as String,
+                                description: document['description'] as String,
+                                price: document['price'] as double,
+                                pId: document['productId'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: ProductGrid(
+                          imageString: document['images'][0],
+                          name: document['productName'],
+                          price: document['price'],
+                          height: MediaQuery.of(context).size.height * 0.0758,
+                        ),
+                      ),
+                    )
+                    .toList();
+
+                // return (storeDocs.isEmpty)
+                //     ? const Center(
+                //         child: AppText(
+                //           text: "No Products Listed",
+                //           color: AppColors.primaryColor,
+                //           weight: FontWeight.w600,
+                //         ),
+                //       )
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 7)
+                      .copyWith(top: 5, bottom: 10),
+                  child: GridView.builder(
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: productGrid.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2),
+                    itemBuilder: (context, index) {
+                      return productGrid[index];
+                    },
+                  ),
+                );
+              }),
             ),
-          );
-        }),
-      ),
     );
   }
 

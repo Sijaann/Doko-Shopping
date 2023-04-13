@@ -41,7 +41,7 @@ dependencies:
   firebase_auth: ^4.2.6
   file_picker: ^5.2.5
   smooth_page_indicator: ^1.0.0
-  shared_preferences: ^2.0.18
+  shared_preferences: ^2.1.0
   carousel_slider: ^4.2.1
   intl: ^0.17.0
   khalti_flutter: ^2.2.1
@@ -70,8 +70,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/
+  # assets:
+  #   - assets/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -128,7 +128,7 @@ class _VendorHomeState extends State<VendorHome> {
                               ),
                             ),
                             width: double.maxFinite,
-                            height: MediaQuery.of(context).size.height * 0.15,
+                            height: MediaQuery.of(context).size.height * 0.143,
                             child: ClipRRect(
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(15),

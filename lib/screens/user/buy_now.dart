@@ -415,12 +415,68 @@ class _BuyNowState extends State<BuyNow> {
                                 PaymentPreference.khalti,
                               ],
                               config: PaymentConfig(
-                                amount: 1000,
+                                amount: (widget.price +
+                                            (widget.price * 0.01).round())
+                                        .toInt() *
+                                    100,
                                 productIdentity: widget.id,
                                 productName: widget.name,
                               ),
                               onSuccess: (PaymentSuccessModel success) {
-                                showSnackBar(context, "Payment Successful !");
+                                showModalBottomSheet(
+                                  barrierColor:
+                                      AppColors.hintTextColor.withOpacity(0.5),
+                                  elevation: 4,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      topRight: Radius.circular(25),
+                                    ),
+                                  ),
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      height: 300,
+                                      decoration: const BoxDecoration(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 15,
+                                          horizontal: 8,
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            const AppText(
+                                              text: "🎉Payment Successful🎊",
+                                              color: Colors.green,
+                                              weight: FontWeight.bold,
+                                              size: 25,
+                                            ),
+                                            AppButton(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              color: AppColors.primaryColor,
+                                              height: 50,
+                                              radius: 10,
+                                              child: const AppText(
+                                                text: "Got It",
+                                                color: AppColors.secondaryColor,
+                                                weight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
                                 paymentID = success.idx;
                                 print(paymentID);
                                 // placeOrder(reference: orders, context: context);
@@ -443,49 +499,110 @@ class _BuyNowState extends State<BuyNow> {
                                 );
                               },
                               onFailure: (PaymentFailureModel failure) {
-                                showDialog(
+                                showModalBottomSheet(
+                                  barrierColor:
+                                      AppColors.hintTextColor.withOpacity(0.5),
+                                  elevation: 4,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      topRight: Radius.circular(25),
+                                    ),
+                                  ),
                                   context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: AppText(
-                                        text: failure.message,
-                                        color: Colors.red,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      height: 300,
+                                      decoration: const BoxDecoration(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                        ),
                                       ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {},
-                                          child: const AppText(
-                                            text: "OK",
-                                            color: AppColors.primaryColor,
-                                            weight: FontWeight.w500,
-                                          ),
-                                        )
-                                      ],
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 15,
+                                          horizontal: 8,
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            AppText(
+                                              text: failure.message,
+                                              color: Colors.red,
+                                            ),
+                                            AppButton(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              color: AppColors.primaryColor,
+                                              height: 50,
+                                              radius: 10,
+                                              child: const AppText(
+                                                text: "Got It",
+                                                color: AppColors.secondaryColor,
+                                                weight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     );
                                   },
                                 );
                               },
                               onCancel: () {
-                                showDialog(
+                                showModalBottomSheet(
+                                  barrierColor:
+                                      AppColors.hintTextColor.withOpacity(0.5),
+                                  elevation: 4,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(25),
+                                      topRight: Radius.circular(25),
+                                    ),
+                                  ),
                                   context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      title: const AppText(
-                                        text: "Payment Canceled!",
-                                        color: Colors.red,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      height: 300,
+                                      decoration: const BoxDecoration(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                        ),
                                       ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const AppText(
-                                            text: "OK",
-                                            color: AppColors.primaryColor,
-                                            weight: FontWeight.w500,
-                                          ),
-                                        )
-                                      ],
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 15,
+                                          horizontal: 8,
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            const AppText(
+                                              text: "Payment Canceled",
+                                              color: Colors.red,
+                                              weight: FontWeight.bold,
+                                            ),
+                                            AppButton(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              color: AppColors.primaryColor,
+                                              height: 40,
+                                              radius: 10,
+                                              child: const AppText(
+                                                text: "Got It",
+                                                color: AppColors.secondaryColor,
+                                                weight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     );
                                   },
                                 );

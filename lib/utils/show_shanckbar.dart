@@ -9,6 +9,7 @@ void showSnackBar(BuildContext context, String text) {
       closeIconColor: AppColors.secondaryColor,
       elevation: 4,
       content: Text(text),
+      behavior: SnackBarBehavior.floating,
     ),
   );
 }

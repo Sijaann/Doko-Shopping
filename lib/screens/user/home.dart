@@ -26,304 +26,356 @@ class _HomeState extends State<Home> {
     "https://images.unsplash.com/photo-1592842232655-e5d345cbc2d0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80",
   ];
 
-  final User user = FirebaseAuth.instance.currentUser!;
+  final User? user = FirebaseAuth.instance.currentUser;
   final SignOut signOut = SignOut();
+
+  bool signedIn = false;
+
+  void checkUserData() {
+    if (user != null) {
+      signedIn = true;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkUserData();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 15,
-            ),
-            child: AppText(
-              text: "Doko Shopping",
-              color: AppColors.secondaryColor,
-            ),
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: IconButton(
-                onPressed: () {
-                  signOut.logout(context: context);
-                },
-                icon: const Icon(Icons.logout_rounded),
-              ),
-            ),
-          ],
-        ),
-        // body: SingleChildScrollView(
-        //   child: Column(
-        //     crossAxisAlignment: CrossAxisAlignment.start,
-        //     children: [
-        //       Container(
-        //         height: MediaQuery.of(context).size.height * 0.3,
-        //         width: MediaQuery.of(context).size.width,
-        //         color: Colors.amber,
-        //         child: ListView.builder(
-        //             scrollDirection: Axis.horizontal,
-        //             itemCount: image.length,
-        //             itemBuilder: (context, index) {
-        //               return SizedBox(
-        //                 width: MediaQuery.of(context).size.width,
-        //                 child: Image.network(
-        //                   image[index],
-        //                   fit: BoxFit.fitWidth,
-        //                 ),
-        //               );
-        //             }),
-        //       ),
-        //       Padding(
-        //         padding:
-        //             const EdgeInsets.symmetric(horizontal: 15).copyWith(top: 10),
-        //         child: const AppText(
-        //           text: "All Products",
-        //           color: AppColors.primaryColor,
-        //           weight: FontWeight.w500,
-        //         ),
-        //       ),
-        //       Padding(
-        //         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        //         child: SizedBox(
-        //           height: MediaQuery.of(context).size.height * 0.8,
-        //           width: MediaQuery.of(context).size.width,
-        //           // color: Colors.orange,
-        //           child: GridView.builder(
-        //             itemCount: 50,
-        //             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        //                 crossAxisCount: 2),
-        //             itemBuilder: (context, index) {
-        //               return GestureDetector(
-        //                 onTap: () {
-        //                   Navigator.push(
-        //                       context,
-        //                       MaterialPageRoute(
-        //                           builder: (context) => const ProductDetail()));
-        //                 },
-        //                 child: Padding(
-        //                   padding: const EdgeInsets.all(4),
-        //                   child: Card(
-        //                     shape: RoundedRectangleBorder(
-        //                       borderRadius: BorderRadius.circular(15),
-        //                     ),
-        //                     elevation: 4,
-        //                     child: Container(
-        //                       decoration: BoxDecoration(
-        //                         borderRadius: BorderRadius.circular(15),
-        //                       ),
-        //                       height: 150,
-        //                       width: 150,
-        //                       child: Column(
-        //                         children: [
-        //                           Container(
-        //                             decoration: const BoxDecoration(
-        //                               borderRadius: BorderRadius.only(
-        //                                 topLeft: Radius.circular(15),
-        //                                 topRight: Radius.circular(15),
-        //                               ),
-        //                             ),
-        //                             width: double.maxFinite,
-        //                             height:
-        //                                 MediaQuery.of(context).size.height * 0.14,
-        //                             child: ClipRRect(
-        //                               borderRadius: const BorderRadius.only(
-        //                                 topLeft: Radius.circular(15),
-        //                                 topRight: Radius.circular(15),
-        //                               ),
-        //                               child: Image.network(
-        //                                 "https://images.unsplash.com/photo-1616423640778-28d1b53229bd?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-        //                                 fit: BoxFit.cover,
-        //                               ),
-        //                             ),
-        //                           ),
-        //                           Container(
-        //                             width: double.maxFinite,
-        //                             height: MediaQuery.of(context).size.height *
-        //                                 0.0655,
-        //                             decoration: const BoxDecoration(
-        //                               borderRadius: BorderRadius.only(
-        //                                 bottomLeft: Radius.circular(15),
-        //                                 bottomRight: Radius.circular(15),
-        //                               ),
-        //                               color: AppColors.primaryColor,
-        //                             ),
-        //                             child: Padding(
-        //                               padding: const EdgeInsets.all(4.0),
-        //                               child: Row(
-        //                                 mainAxisAlignment:
-        //                                     MainAxisAlignment.spaceBetween,
-        //                                 children: [
-        //                                   Column(
-        //                                     mainAxisAlignment:
-        //                                         MainAxisAlignment.spaceEvenly,
-        //                                     children: const [
-        //                                       AppText(
-        //                                         text: "Camera",
-        //                                         color: AppColors.secondaryColor,
-        //                                         size: 16,
-        //                                         weight: FontWeight.w500,
-        //                                       ),
-        //                                       AppText(
-        //                                         text: "Rs. 50000",
-        //                                         color: AppColors.secondaryColor,
-        //                                         size: 13,
-        //                                       )
-        //                                     ],
-        //                                   ),
-        //                                   const Icon(
-        //                                     Icons.add_circle_outline_rounded,
-        //                                     color: AppColors.secondaryColor,
-        //                                   )
-        //                                 ],
-        //                               ),
-        //                             ),
-        //                           )
-        //                         ],
-        //                       ),
-        //                     ),
-        //                   ),
-        //                 ),
-        //               );
-        //             },
-        //           ),
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
-
-        body: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('products').snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return const Center(
+      appBar: (signedIn == false)
+          ? AppBar(
+              title: const Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 15,
+                ),
                 child: AppText(
-                  text: "Something went wrong",
-                  color: AppColors.primaryColor,
-                  weight: FontWeight.w500,
+                  text: "Doko Shopping",
+                  color: AppColors.secondaryColor,
                 ),
-              );
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            final List<GestureDetector> productGrid =
-                snapshot.data!.docs.map((DocumentSnapshot document) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProductDetail(
-                        images: document['images'],
-                        name: document['productName'],
-                        description: document['description'],
-                        price: document['price'],
-                        pId: document['productId'],
-                        uId: user.uid,
-                        vendorId: document['vendorId'],
-                      ),
-                    ),
-                  );
-                  print(user.uid);
-                },
-                child: ProductGrid(
-                  imageString: document['images'][0],
-                  name: document['productName'],
-                  price: document['price'],
-                  height: MediaQuery.of(context).size.height * 0.0721,
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Login(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.login),
+                  ),
                 ),
-              );
-            }).toList();
-
-            return (productGrid.isEmpty)
-                ? const Center(
+              ],
+            )
+          : AppBar(
+              title: const Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 15,
+                ),
+                child: AppText(
+                  text: "Doko Shopping",
+                  color: AppColors.secondaryColor,
+                ),
+              ),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: IconButton(
+                    onPressed: () {
+                      signOut.logout(context: context);
+                    },
+                    icon: const Icon(Icons.logout_rounded),
+                  ),
+                ),
+              ],
+            ),
+      body: (signedIn == false)
+          ? StreamBuilder<QuerySnapshot>(
+              stream:
+                  FirebaseFirestore.instance.collection('products').snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
                     child: AppText(
-                      text: "No Products Found!",
+                      text: "Something went wrong",
                       color: AppColors.primaryColor,
                       weight: FontWeight.w500,
                     ),
-                  )
-                : SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.25,
-                          width: MediaQuery.of(context).size.width,
-                          color: Colors.amber,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: image.length,
-                            itemBuilder: (context, index) {
-                              return SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: Image.network(
-                                  image[index],
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            },
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final List<GestureDetector> productGrid =
+                    snapshot.data!.docs.map(
+                  (DocumentSnapshot document) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductDetail(
+                              images: document['images'],
+                              name: document['productName'],
+                              description: document['description'],
+                              price: document['price'],
+                              pId: document['productId'],
+                              uId: "",
+                              vendorId: document['vendorId'],
+                            ),
                           ),
+                        );
+                        // print(user!.uid);
+                      },
+                      child: ProductGrid(
+                        imageString: document['images'][0],
+                        name: document['productName'],
+                        price: document['price'],
+                        height: MediaQuery.of(context).size.height * 0.0721,
+                      ),
+                    );
+                  },
+                ).toList();
+
+                return (productGrid.isEmpty)
+                    ? const Center(
+                        child: AppText(
+                          text: "No Products Found!",
+                          color: AppColors.primaryColor,
+                          weight: FontWeight.w500,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15)
-                              .copyWith(top: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const AppText(
-                                text: "Featured Products",
-                                color: AppColors.primaryColor,
-                                weight: FontWeight.w500,
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const AllProducts(),
+                      )
+                    : SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: MediaQuery.of(context).size.height * 0.25,
+                              width: MediaQuery.of(context).size.width,
+                              color: Colors.amber,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: image.length,
+                                itemBuilder: (context, index) {
+                                  return SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Image.network(
+                                      image[index],
+                                      fit: BoxFit.cover,
                                     ),
                                   );
                                 },
-                                child: const AppText(
-                                  text: "See all",
-                                  color: AppColors.hintTextColor,
-                                  size: 15,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10)
-                              .copyWith(top: 10),
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.8,
-                            width: MediaQuery.of(context).size.width,
-                            child: GridView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: 4,
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2),
-                              itemBuilder: (context, index) {
-                                return productGrid[index];
-                              },
+                              ),
                             ),
-                          ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15)
+                                      .copyWith(top: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const AppText(
+                                    text: "Featured Products",
+                                    color: AppColors.primaryColor,
+                                    weight: FontWeight.w500,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const AllProducts(),
+                                        ),
+                                      );
+                                    },
+                                    child: const AppText(
+                                      text: "See all",
+                                      color: AppColors.hintTextColor,
+                                      size: 15,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10)
+                                      .copyWith(top: 10),
+                              child: SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.8,
+                                width: MediaQuery.of(context).size.width,
+                                child: GridView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: (productGrid.length >= 4)
+                                      ? 4
+                                      : productGrid.length,
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2),
+                                  itemBuilder: (context, index) {
+                                    return productGrid[index];
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      );
+              },
+            )
+          : StreamBuilder<QuerySnapshot>(
+              stream:
+                  FirebaseFirestore.instance.collection('products').snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: AppText(
+                      text: "Something went wrong",
+                      color: AppColors.primaryColor,
+                      weight: FontWeight.w500,
                     ),
                   );
-          },
-        ));
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                final List<GestureDetector> productGrid =
+                    snapshot.data!.docs.map((DocumentSnapshot document) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProductDetail(
+                            images: document['images'],
+                            name: document['productName'],
+                            description: document['description'],
+                            price: document['price'],
+                            pId: document['productId'],
+                            uId: user!.uid,
+                            vendorId: document['vendorId'],
+                          ),
+                        ),
+                      );
+                      print(user!.uid);
+                    },
+                    child: ProductGrid(
+                      imageString: document['images'][0],
+                      name: document['productName'],
+                      price: document['price'],
+                      height: MediaQuery.of(context).size.height * 0.0721,
+                    ),
+                  );
+                }).toList();
+
+                return (productGrid.isEmpty)
+                    ? const Center(
+                        child: AppText(
+                          text: "No Products Found!",
+                          color: AppColors.primaryColor,
+                          weight: FontWeight.w500,
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: MediaQuery.of(context).size.height * 0.25,
+                              width: MediaQuery.of(context).size.width,
+                              color: Colors.amber,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: image.length,
+                                itemBuilder: (context, index) {
+                                  return SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Image.network(
+                                      image[index],
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15)
+                                      .copyWith(top: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const AppText(
+                                    text: "Featured Products",
+                                    color: AppColors.primaryColor,
+                                    weight: FontWeight.w500,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const AllProducts(),
+                                        ),
+                                      );
+                                    },
+                                    child: const AppText(
+                                      text: "See all",
+                                      color: AppColors.hintTextColor,
+                                      size: 15,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10)
+                                      .copyWith(top: 10),
+                              child: SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.8,
+                                width: MediaQuery.of(context).size.width,
+                                child: GridView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: (productGrid.length >= 4)
+                                      ? 4
+                                      : productGrid.length,
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2),
+                                  itemBuilder: (context, index) {
+                                    return productGrid[index];
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+              },
+            ),
+    );
   }
 
   logout() {

@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce/logic/updateData.dart';
+import 'package:ecommerce/screens/login.dart';
 import 'package:ecommerce/screens/user/buy_now.dart';
 import 'package:ecommerce/utils/app_button.dart';
 import 'package:ecommerce/utils/app_text.dart';
 import 'package:ecommerce/utils/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProductDetail extends StatefulWidget {
@@ -80,15 +82,6 @@ class _ProductDetailState extends State<ProductDetail> {
             color: AppColors.secondaryColor,
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.shopping_cart_outlined),
-            ),
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -221,106 +214,303 @@ class _ProductDetailState extends State<ProductDetail> {
               ),
             ),
           ),
-          Align(
-            alignment: AlignmentDirectional.bottomCenter,
-            child: Container(
-              height: 55,
-              width: MediaQuery.of(context).size.width,
-              color: AppColors.primaryColor,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  AppButton(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BuyNow(
-                            vendorId: widget.vendorId,
-                            image: widget.images[0],
-                            name: widget.name,
-                            price: widget.price,
-                            id: widget.pId,
+          (widget.uId.isEmpty)
+              ? Align(
+                  alignment: AlignmentDirectional.bottomCenter,
+                  child: Container(
+                    height: 55,
+                    width: MediaQuery.of(context).size.width,
+                    color: AppColors.primaryColor,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        AppButton(
+                          onTap: () {
+                            showModalBottomSheet(
+                              barrierColor:
+                                  AppColors.hintTextColor.withOpacity(0.5),
+                              elevation: 4,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(25),
+                                  topRight: Radius.circular(25),
+                                ),
+                              ),
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Container(
+                                  height: 300,
+                                  decoration: const BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 15,
+                                      horizontal: 8,
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        const AppText(
+                                          text: "!!! Alert !!!",
+                                          color: Colors.red,
+                                          weight: FontWeight.bold,
+                                          size: 25,
+                                        ),
+                                        const AppText(
+                                          text: "Login to buy products",
+                                          color: AppColors.primaryColor,
+                                          weight: FontWeight.w500,
+                                        ),
+                                        AppButton(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const Login(),
+                                              ),
+                                            );
+                                          },
+                                          color: AppColors.primaryColor,
+                                          height: 50,
+                                          radius: 10,
+                                          child: const AppText(
+                                            text: "Login",
+                                            color: AppColors.secondaryColor,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          color: AppColors.primaryColor,
+                          height: 50,
+                          radius: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              AppText(
+                                text: "Buy Now",
+                                color: AppColors.secondaryColor,
+                                size: 18,
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Icon(
+                                Icons.currency_rupee,
+                                size: 20,
+                                color: AppColors.secondaryColor,
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    },
-                    color: AppColors.primaryColor,
-                    height: 50,
-                    radius: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        AppText(
-                          text: "Buy Now",
+                        const VerticalDivider(
+                          thickness: 2,
                           color: AppColors.secondaryColor,
-                          size: 18,
                         ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Icon(
-                          Icons.currency_rupee,
-                          size: 20,
-                          color: AppColors.secondaryColor,
+                        AppButton(
+                          onTap: () {
+                            showModalBottomSheet(
+                              barrierColor:
+                                  AppColors.hintTextColor.withOpacity(0.5),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(25),
+                                  topRight: Radius.circular(25),
+                                ),
+                              ),
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Container(
+                                  height: 300,
+                                  decoration: const BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 15, horizontal: 10),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        const AppText(
+                                          text: "!!! Alert !!!",
+                                          color: Colors.red,
+                                          weight: FontWeight.bold,
+                                          size: 25,
+                                        ),
+                                        const AppText(
+                                          text: "Login to add products to cart",
+                                          color: AppColors.primaryColor,
+                                          weight: FontWeight.w500,
+                                        ),
+                                        AppButton(
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const Login(),
+                                              ),
+                                            );
+                                          },
+                                          color: AppColors.primaryColor,
+                                          height: 50,
+                                          radius: 10,
+                                          child: const AppText(
+                                            text: "Login",
+                                            color: AppColors.secondaryColor,
+                                            weight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          color: AppColors.primaryColor,
+                          height: 50,
+                          radius: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              AppText(
+                                text: "Add To Cart",
+                                color: AppColors.secondaryColor,
+                                size: 18,
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Icon(
+                                Icons.shopping_cart_outlined,
+                                size: 20,
+                                color: AppColors.secondaryColor,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const VerticalDivider(
-                    thickness: 2,
-                    color: AppColors.secondaryColor,
-                  ),
-                  AppButton(
-                    onTap: () {
-                      productDetails = {
-                        'pId': widget.pId,
-                        'name': widget.name,
-                        'price': widget.price,
-                        'quantity': quantity,
-                        'images': widget.images[0],
-                        'vendor': widget.vendorId,
-                      };
-
-                      setState(() {
-                        // addProductToCart(productDetails: productDetails);
-                        updateData.addProductToCart(
-                          reference: users,
-                          userId: widget.uId,
-                          productDetails: productDetails,
-                          context: context,
-                        );
-
-                        // addProductToCart(productDetailsList: [productDetails]);
-                      });
-                      productDetails.clear();
-                    },
+                )
+              : Align(
+                  alignment: AlignmentDirectional.bottomCenter,
+                  child: Container(
+                    height: 55,
+                    width: MediaQuery.of(context).size.width,
                     color: AppColors.primaryColor,
-                    height: 50,
-                    radius: 0,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        AppText(
-                          text: "Add To Cart",
-                          color: AppColors.secondaryColor,
-                          size: 18,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        AppButton(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BuyNow(
+                                  vendorId: widget.vendorId,
+                                  image: widget.images[0],
+                                  name: widget.name,
+                                  price: widget.price,
+                                  id: widget.pId,
+                                ),
+                              ),
+                            );
+                          },
+                          color: AppColors.primaryColor,
+                          height: 50,
+                          radius: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              AppText(
+                                text: "Buy Now",
+                                color: AppColors.secondaryColor,
+                                size: 18,
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Icon(
+                                Icons.currency_rupee,
+                                size: 20,
+                                color: AppColors.secondaryColor,
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Icon(
-                          Icons.shopping_cart_outlined,
-                          size: 20,
+                        const VerticalDivider(
+                          thickness: 2,
                           color: AppColors.secondaryColor,
+                        ),
+                        AppButton(
+                          onTap: () {
+                            productDetails = {
+                              'pId': widget.pId,
+                              'name': widget.name,
+                              'price': widget.price,
+                              'quantity': quantity,
+                              'images': widget.images[0],
+                              'vendor': widget.vendorId,
+                            };
+
+                            setState(() {
+                              // addProductToCart(productDetails: productDetails);
+                              updateData.addProductToCart(
+                                reference: users,
+                                userId: widget.uId,
+                                productDetails: productDetails,
+                                context: context,
+                              );
+
+                              // addProductToCart(productDetailsList: [productDetails]);
+                            });
+                            productDetails.clear();
+                          },
+                          color: AppColors.primaryColor,
+                          height: 50,
+                          radius: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              AppText(
+                                text: "Add To Cart",
+                                color: AppColors.secondaryColor,
+                                size: 18,
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Icon(
+                                Icons.shopping_cart_outlined,
+                                size: 20,
+                                color: AppColors.secondaryColor,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          )
+                )
         ],
       ),
     );

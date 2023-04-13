@@ -1,4 +1,5 @@
 import 'package:ecommerce/screens/admin/admin_home.dart';
+import 'package:ecommerce/screens/admin/revenue.dart';
 import 'package:ecommerce/screens/admin/vendor_request.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +13,9 @@ class AdminNav extends StatefulWidget {
 
 class _AdminNavState extends State<AdminNav> {
   List _pages = [
-    AdminHome(),
-    VendorRequest(),
+    const AdminHome(),
+    const VendorRequest(),
+    const RevenueScreen(),
   ];
 
   int currentIndex = 0;
@@ -43,6 +45,10 @@ class _AdminNavState extends State<AdminNav> {
           BottomNavigationBarItem(
             icon: Icon(Icons.verified),
             label: "Verify",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.currency_rupee),
+            label: "Revenue",
           )
         ],
       ),

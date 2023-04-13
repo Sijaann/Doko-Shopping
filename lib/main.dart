@@ -1,11 +1,15 @@
+import 'package:ecommerce/screens/admin/admin_nav.dart';
 import 'package:ecommerce/screens/login.dart';
+import 'package:ecommerce/screens/user/home.dart';
 import 'package:ecommerce/screens/user/nav_page.dart';
 import 'package:ecommerce/screens/splash.dart';
+import 'package:ecommerce/screens/vendor/vendorNav.dart';
 import 'package:ecommerce/utils/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:khalti_flutter/khalti_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,15 +58,36 @@ class RedirectPage extends StatefulWidget {
 }
 
 class _RedirectPageState extends State<RedirectPage> {
+  String? userRole;
+
+  void getUserRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    userRole = prefs.getString('userRole');
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserRole();
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return const NavPage();
+          if (userRole == "Admin") {
+            return const AdminNav();
+          } else if (userRole == "Vendor") {
+            return const VendorNav();
+          } else {
+            return const NavPage();
+          }
         } else {
-          return const Login();
+          return const NavPage();
         }
       },
     );

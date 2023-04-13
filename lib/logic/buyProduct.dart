@@ -22,7 +22,7 @@ class BuyProduct {
   }) async {
     try {
       await reference.add({
-        'serviceTax': price * 0.01.ceilToDouble(),
+        'serviceTax': price * 0.01.round(),
         'vendorId': vendorId,
         'products': [
           {
@@ -34,7 +34,7 @@ class BuyProduct {
           }
         ],
         'userId': userId,
-        'grandTotal': price + (price * 0.01).ceilToDouble(),
+        'grandTotal': price + (price * 0.01).round(),
         'address': address,
         'name': name,
         'contact': contact,
